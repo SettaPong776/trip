@@ -46,9 +46,17 @@ function initializeDatabase($pdo) {
         total_budget REAL DEFAULT 0,
         cover_emoji TEXT DEFAULT '✈️',
         created_by INTEGER,
+        is_canceled INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE SET NULL
     );");
+
+    // Migration: Add is_canceled column if it doesn't exist
+    try {
+        $pdo->exec("ALTER TABLE trips ADD COLUMN is_canceled INTEGER DEFAULT 0;");
+    } catch (PDOException $e) {
+        // Column already exists
+    }
 
     // 3. Trip members (join table: user ↔ trip, with invite status)
     $pdo->exec("CREATE TABLE IF NOT EXISTS trip_members (

@@ -64,11 +64,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'role' => $role
         ]);
         
+        $new_user_id = $db->lastInsertId();
+        
+        // Automatically add this new user to all existing trips as 'pending'
+        $stmtTrips = $db->query("SELECT id FROM trips");
+        $trip_ids = $stmtTrips->fetchAll(PDO::FETCH_COLUMN);
+        if (!empty($trip_ids)) {
+            $stmtTM = $db->prepare("INSERT OR IGNORE INTO trip_members (trip_id, user_id, invite_status) VALUES (:trip_id, :user_id, 'pending')");
+            foreach ($trip_ids as $tid) {
+                $stmtTM->execute(['trip_id' => $tid, 'user_id' => $new_user_id]);
+            }
+        }
+        
         sendResponse([
             'success' => true,
             'message' => 'เพิ่มสมาชิกสำเร็จ',
             'user' => [
-                'id' => $db->lastInsertId(),
+                'id' => $new_user_id,
                 'name' => $name,
                 'passcode' => $passcode,
                 'role' => $role

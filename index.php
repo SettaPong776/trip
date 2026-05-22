@@ -396,7 +396,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" style="display: none;">
                     <label class="form-label">เลือกผู้เข้าร่วมทริป</label>
                     <div id="createTripMembersList" class="global-members-checklist" style="max-height: 180px; overflow-y: auto; background: var(--surface-1); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                         <!-- Checkboxes injected by JS -->
@@ -444,7 +444,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" style="display: none;">
                     <label class="form-label">เลือกผู้เข้าร่วมทริป</label>
                     <div id="editTripMembersList" class="global-members-checklist" style="max-height: 180px; overflow-y: auto; background: var(--surface-1); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                         <!-- Checkboxes injected by JS -->

@@ -39,6 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'create') {
         ]);
         $trip_id = $db->lastInsertId();
         
+        // Query all global user IDs
+        $stmtUsers = $db->query("SELECT id FROM users");
+        $all_user_ids = $stmtUsers->fetchAll(PDO::FETCH_COLUMN);
+
         // 2. Add creator to trip_members with 'accepted' status
         $stmtTM = $db->prepare("INSERT INTO trip_members (trip_id, user_id, invite_status) VALUES (:trip_id, :user_id, 'accepted')");
         $stmtTM->execute([
@@ -46,14 +50,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'create') {
             'user_id' => $user['id']
         ]);
         
-        // Make sure creator is not duplicated in member_ids
-        $member_ids = array_diff($member_ids, [$user['id']]);
-        
-        // 3. Add other members to trip_members with 'pending' status
-        if (!empty($member_ids)) {
+        // 3. Add other members to trip_members with 'pending' status automatically
+        $other_user_ids = array_diff($all_user_ids, [$user['id']]);
+        if (!empty($other_user_ids)) {
             $stmtTMOther = $db->prepare("INSERT INTO trip_members (trip_id, user_id, invite_status) VALUES (:trip_id, :user_id, 'pending')");
-            foreach ($member_ids as $m_id) {
-                if ($m_id <= 0) continue;
+            foreach ($other_user_ids as $m_id) {
                 $stmtTMOther->execute([
                     'trip_id' => $trip_id,
                     'user_id' => $m_id
@@ -180,27 +181,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'id' => $ctx['trip_id']
             ]);
             
-            // 2. Synchronize trip members list
+            // 2. Synchronize trip members list with all global users
+            $stmtUsers = $db->query("SELECT id FROM users");
+            $all_user_ids = $stmtUsers->fetchAll(PDO::FETCH_COLUMN);
+
             $stmtExisting = $db->prepare("SELECT user_id FROM trip_members WHERE trip_id = :trip_id");
             $stmtExisting->execute(['trip_id' => $ctx['trip_id']]);
             $existingIDs = $stmtExisting->fetchAll(PDO::FETCH_COLUMN);
             
-            // Ensure the creator/admin is kept in the trip
-            // If they are not in the new member list, add them and keep their status
-            if (!in_array($ctx['user_id'], $new_member_ids)) {
-                $new_member_ids[] = $ctx['user_id'];
-            }
-            
-            // Delete members who are no longer in the trip
-            $to_delete = array_diff($existingIDs, $new_member_ids);
-            if (!empty($to_delete)) {
-                $placeholders = implode(',', array_fill(0, count($to_delete), '?'));
-                $stmtDel = $db->prepare("DELETE FROM trip_members WHERE trip_id = ? AND user_id IN ($placeholders)");
-                $stmtDel->execute(array_merge([$ctx['trip_id']], $to_delete));
-            }
-            
-            // Insert new members
-            $to_insert = array_diff($new_member_ids, $existingIDs);
+            // Insert missing users
+            $to_insert = array_diff($all_user_ids, $existingIDs);
             if (!empty($to_insert)) {
                 $stmtIns = $db->prepare("INSERT INTO trip_members (trip_id, user_id, invite_status) VALUES (:trip_id, :user_id, :invite_status)");
                 foreach ($to_insert as $uid) {
@@ -224,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete') {
         $input = json_decode(file_get_contents('php://input'), true);
         $trip_id = intval($input['trip_id'] ?? ($_SESSION['active_trip_id'] ?? 0));
+        $force = isset($input['force']) && $input['force'] === true;
         
         if ($trip_id <= 0) {
             sendResponse(['error' => 'Trip ID ไม่ถูกต้อง'], 400);
@@ -234,14 +225,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             sendResponse(['error' => 'เฉพาะแอดมินเท่านั้นที่สามารถยกเลิก/ลบโครงการได้'], 403);
         }
         
-        $stmt = $db->prepare("DELETE FROM trips WHERE id = :id");
-        $stmt->execute(['id' => $trip_id]);
+        if ($force) {
+            $stmt = $db->prepare("DELETE FROM trips WHERE id = :id");
+            $stmt->execute(['id' => $trip_id]);
+            if (isset($_SESSION['active_trip_id']) && (int)$_SESSION['active_trip_id'] === $trip_id) {
+                unset($_SESSION['active_trip_id']);
+            }
+            sendResponse(['success' => true, 'message' => 'ลบโครงการท่องเที่ยวถาวรสำเร็จ']);
+        } else {
+            $stmt = $db->prepare("UPDATE trips SET is_canceled = 1 WHERE id = :id");
+            $stmt->execute(['id' => $trip_id]);
+            sendResponse(['success' => true, 'message' => 'ยกเลิกโครงการท่องเที่ยวสำเร็จ']);
+        }
+    }
+    
+    if ($action === 'restore') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $trip_id = intval($input['trip_id'] ?? ($_SESSION['active_trip_id'] ?? 0));
         
-        if (isset($_SESSION['active_trip_id']) && (int)$_SESSION['active_trip_id'] === $trip_id) {
-            unset($_SESSION['active_trip_id']);
+        if ($trip_id <= 0) {
+            sendResponse(['error' => 'Trip ID ไม่ถูกต้อง'], 400);
         }
         
-        sendResponse(['success' => true, 'message' => 'ยกเลิก/ลบโครงการท่องเที่ยวสำเร็จ']);
+        $ctx = checkTripAccess($db, $trip_id);
+        if ($ctx['role'] !== 'admin') {
+            sendResponse(['error' => 'เฉพาะแอดมินเท่านั้นที่สามารถกู้คืนโครงการได้'], 403);
+        }
+        
+        $stmt = $db->prepare("UPDATE trips SET is_canceled = 0 WHERE id = :id");
+        $stmt->execute(['id' => $trip_id]);
+        
+        sendResponse(['success' => true, 'message' => 'กู้คืนโครงการท่องเที่ยวสำเร็จ']);
     }
     
     if ($action === 'update_invite_status') {

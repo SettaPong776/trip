@@ -5,6 +5,8 @@
 // ==========================================
 const iconEditSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
 const iconDeleteSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+const iconCancelSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line></svg>`;
+const iconRestoreSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>`;
 const iconCopySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 const iconMapSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
 
@@ -428,7 +430,9 @@ function renderTripSelector() {
         const end = new Date(upcoming.end_date);
         let countdownText = '';
         
-        if (today < start) {
+        if (upcoming.is_canceled == 1) {
+            countdownText = 'ยกเลิกแล้ว';
+        } else if (today < start) {
             const diff = Math.ceil((start - today) / (1000*60*60*24));
             countdownText = `อีก ${diff} วัน`;
         } else if (today >= start && today <= end) {
@@ -437,12 +441,21 @@ function renderTripSelector() {
         
         let actionButtonsHtml = '';
         if (currentUser.role === 'admin') {
-            actionButtonsHtml = `
-                <div class="trip-card-actions" style="top: 20px; right: 20px;">
-                    <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconEditSvg}</button>
-                    <button type="button" class="btn-icon card-delete-btn" title="ลบ" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
-                </div>
-            `;
+            if (upcoming.is_canceled == 1) {
+                actionButtonsHtml = `
+                    <div class="trip-card-actions" style="top: 20px; right: 20px;">
+                        <button type="button" class="btn-icon card-restore-btn" title="กู้คืนโครงการ" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconRestoreSvg}</button>
+                        <button type="button" class="btn-icon card-force-delete-btn" title="ลบถาวร" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
+                    </div>
+                `;
+            } else {
+                actionButtonsHtml = `
+                    <div class="trip-card-actions" style="top: 20px; right: 20px;">
+                        <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconEditSvg}</button>
+                        <button type="button" class="btn-icon card-cancel-btn" title="ยกเลิกโครงการ" style="color:var(--apple-orange);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconCancelSvg}</button>
+                    </div>
+                `;
+            }
         }
         
         bannerContainer.innerHTML = `
@@ -461,20 +474,31 @@ function renderTripSelector() {
                         <strong>${formatCurrency(upcoming.total_budget)}</strong> ฿
                     </div>
                 </div>
-                ${countdownText ? `<div class="countdown-badge">${countdownText}</div>` : ''}
+                ${countdownText ? `<div class="countdown-badge" style="${upcoming.is_canceled == 1 ? 'background:rgba(255, 59, 48, 0.15);color:var(--apple-red);border:1px solid rgba(255,59,48,0.25);' : ''}">${countdownText}</div>` : ''}
                 ${actionButtonsHtml}
             </div>`;
             
         if (currentUser.role === 'admin') {
             const banner = bannerContainer.querySelector('.upcoming-banner');
-            banner.querySelector('.card-edit-btn').onclick = (e) => {
-                e.stopPropagation();
-                openEditTrip(upcoming.id);
-            };
-            banner.querySelector('.card-delete-btn').onclick = (e) => {
-                e.stopPropagation();
-                deleteTrip(upcoming.id, upcoming.title);
-            };
+            if (upcoming.is_canceled == 1) {
+                banner.querySelector('.card-restore-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    restoreTrip(upcoming.id, upcoming.title);
+                };
+                banner.querySelector('.card-force-delete-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    forceDeleteTrip(upcoming.id, upcoming.title);
+                };
+            } else {
+                banner.querySelector('.card-edit-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    openEditTrip(upcoming.id);
+                };
+                banner.querySelector('.card-cancel-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    cancelTrip(upcoming.id, upcoming.title);
+                };
+            }
         }
     }
     
@@ -484,18 +508,37 @@ function renderTripSelector() {
         const end = new Date(t.end_date);
         let statusClass = '', statusText = '';
         
-        if (today < start) { statusClass = 'trip-status-upcoming'; statusText = 'กำลังมาถึง'; }
-        else if (today >= start && today <= end) { statusClass = 'trip-status-active'; statusText = 'กำลังเดินทาง'; }
-        else { statusClass = 'trip-status-completed'; statusText = 'เสร็จสิ้น'; }
+        if (t.is_canceled == 1) {
+            statusClass = 'trip-status-canceled';
+            statusText = 'ยกเลิกแล้ว';
+        } else if (today < start) {
+            statusClass = 'trip-status-upcoming';
+            statusText = 'กำลังมาถึง';
+        } else if (today >= start && today <= end) {
+            statusClass = 'trip-status-active';
+            statusText = 'กำลังเดินทาง';
+        } else {
+            statusClass = 'trip-status-completed';
+            statusText = 'เสร็จสิ้น';
+        }
         
         let actionButtonsHtml = '';
         if (currentUser.role === 'admin') {
-            actionButtonsHtml = `
-                <div class="trip-card-actions">
-                    <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconEditSvg}</button>
-                    <button type="button" class="btn-icon card-delete-btn" title="ลบ" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
-                </div>
-            `;
+            if (t.is_canceled == 1) {
+                actionButtonsHtml = `
+                    <div class="trip-card-actions">
+                        <button type="button" class="btn-icon card-restore-btn" title="กู้คืนโครงการ" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconRestoreSvg}</button>
+                        <button type="button" class="btn-icon card-force-delete-btn" title="ลบถาวร" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
+                    </div>
+                `;
+            } else {
+                actionButtonsHtml = `
+                    <div class="trip-card-actions">
+                        <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconEditSvg}</button>
+                        <button type="button" class="btn-icon card-cancel-btn" title="ยกเลิกโครงการ" style="color:var(--apple-orange);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconCancelSvg}</button>
+                    </div>
+                `;
+            }
         }
         
         const card = document.createElement("div");
@@ -515,14 +558,25 @@ function renderTripSelector() {
             ${actionButtonsHtml}`;
             
         if (currentUser.role === 'admin') {
-            card.querySelector('.card-edit-btn').onclick = (e) => {
-                e.stopPropagation();
-                openEditTrip(t.id);
-            };
-            card.querySelector('.card-delete-btn').onclick = (e) => {
-                e.stopPropagation();
-                deleteTrip(t.id, t.title);
-            };
+            if (t.is_canceled == 1) {
+                card.querySelector('.card-restore-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    restoreTrip(t.id, t.title);
+                };
+                card.querySelector('.card-force-delete-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    forceDeleteTrip(t.id, t.title);
+                };
+            } else {
+                card.querySelector('.card-edit-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    openEditTrip(t.id);
+                };
+                card.querySelector('.card-cancel-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    cancelTrip(t.id, t.title);
+                };
+            }
         }
         gridContainer.appendChild(card);
     });
@@ -1068,24 +1122,66 @@ async function closeEditTrip() {
     await backToTripSelector();
 }
 
-async function deleteTrip(tripId, title) {
-    if (!await showConfirm(`ต้องการยกเลิกและลบโครงการ "${title}"? การลบนี้รวมถึงแผนงานและค่าใช้จ่ายทั้งหมดในโครงการและจะไม่สามารถกู้คืนได้`)) return;
+async function cancelTrip(tripId, title) {
+    if (!await showConfirm(`ต้องการยกเลิกโครงการ "${title}"? โครงการที่ยกเลิกแล้วจะยังไม่ถูกลบถาวร`)) return;
     try {
         const res = await fetch("api/trip.php?action=delete", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ trip_id: tripId })
+            body: JSON.stringify({ trip_id: tripId, force: false })
         });
         const data = await res.json();
         if (data.success) {
-            showToast(data.message || "ลบโครงการสำเร็จ", "success");
+            showToast(data.message || "ยกเลิกโครงการสำเร็จ", "success");
             await refreshTripsAndShow();
         } else {
             showToast(data.error, "error");
         }
     } catch (err) {
         console.error(err);
-        showToast("เกิดข้อผิดพลาดในการลบโครงการ", "error");
+        showToast("เกิดข้อผิดพลาดในการยกเลิกโครงการ", "error");
+    }
+}
+
+async function restoreTrip(tripId, title) {
+    if (!await showConfirm(`ต้องการกู้คืนโครงการ "${title}" กลับมาใช้งานหรือไม่?`)) return;
+    try {
+        const res = await fetch("api/trip.php?action=restore", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trip_id: tripId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(data.message || "กู้คืนโครงการสำเร็จ", "success");
+            await refreshTripsAndShow();
+        } else {
+            showToast(data.error, "error");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("เกิดข้อผิดพลาดในการกู้คืนโครงการ", "error");
+    }
+}
+
+async function forceDeleteTrip(tripId, title) {
+    if (!await showConfirm(`ต้องการลบโครงการ "${title}" ถาวรหรือไม่?\nการลบนี้รวมถึงแผนงานและค่าใช้จ่ายทั้งหมดในโครงการและจะไม่สามารถกู้คืนได้!`)) return;
+    try {
+        const res = await fetch("api/trip.php?action=delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trip_id: tripId, force: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(data.message || "ลบโครงการถาวรสำเร็จ", "success");
+            await refreshTripsAndShow();
+        } else {
+            showToast(data.error, "error");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("เกิดข้อผิดพลาดในการลบโครงการถาวร", "error");
     }
 }
 
@@ -1133,7 +1229,7 @@ function renderKanbanBoard() {
                 const btnLabels = { accepted: 'ตกลง', pending: 'รอ', declined: 'ปฏิเสธ' };
                 btnHtml = `<div style="display:flex;gap:4px;margin-left:auto;">`;
                 options.forEach(opt => {
-                    btnHtml += `<button class="btn btn-xs btn-secondary" onclick="updateInviteStatus(${targetId},'${opt}')">${btnLabels[opt]}</button>`;
+                    btnHtml += `<button class="btn btn-xs btn-status-${opt}" onclick="updateInviteStatus(${targetId},'${opt}')">${btnLabels[opt]}</button>`;
                 });
                 btnHtml += `</div>`;
             }
@@ -1823,6 +1919,9 @@ function closeSidebar() {
 }
 
 window.selectTrip = selectTrip;
+window.cancelTrip = cancelTrip;
+window.restoreTrip = restoreTrip;
+window.forceDeleteTrip = forceDeleteTrip;
 window.openEditGlobalUserModal = openEditGlobalUserModal;
 window.deleteGlobalUser = deleteGlobalUser;
 window.deleteExpense = deleteExpense;
