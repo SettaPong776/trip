@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['role'] === 'admin') {
                 $stmtTrips = $db->prepare("
                     SELECT t.*, 'admin' AS role, 'accepted' AS invite_status,
-                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id) as member_count
+                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id AND invite_status = 'accepted') as member_count
                     FROM trips t
                     ORDER BY t.start_date ASC
                 ");
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $stmtTrips = $db->prepare("
                     SELECT t.*, 'member' AS role, tm.invite_status,
-                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id) as member_count
+                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id AND invite_status = 'accepted') as member_count
                     FROM trip_members tm
                     JOIN trips t ON tm.trip_id = t.id
                     WHERE tm.user_id = :user_id
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if ($user['role'] === 'admin') {
                 $stmtTrips = $db->prepare("
                     SELECT t.*, 'admin' AS role, 'accepted' AS invite_status,
-                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id) as member_count
+                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id AND invite_status = 'accepted') as member_count
                     FROM trips t
                     ORDER BY t.start_date ASC
                 ");
@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             } else {
                 $stmtTrips = $db->prepare("
                     SELECT t.*, 'member' AS role, tm.invite_status,
-                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id) as member_count
+                        (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id AND invite_status = 'accepted') as member_count
                     FROM trip_members tm
                     JOIN trips t ON tm.trip_id = t.id
                     WHERE tm.user_id = :user_id

@@ -47,10 +47,21 @@ const ThaiHolidays = {
         }
     },
 
+    parseLocalDate: function(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+        const d = new Date(dateStr);
+        d.setHours(0,0,0,0);
+        return d;
+    },
+
     // Check if a specific date (YYYY-MM-DD) is a holiday
     getHoliday: function(dateStr) {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return null;
+        const date = this.parseLocalDate(dateStr);
+        if (!date || isNaN(date.getTime())) return null;
         
         const year = date.getFullYear().toString();
         const monthDay = dateStr.substring(5, 10); // MM-DD
@@ -71,15 +82,18 @@ const ThaiHolidays = {
 
     // Get list of holidays between startDate (YYYY-MM-DD) and endDate (YYYY-MM-DD)
     getHolidaysInRange: function(startDateStr, endDateStr) {
-        const start = new Date(startDateStr);
-        const end = new Date(endDateStr);
+        const start = this.parseLocalDate(startDateStr);
+        const end = this.parseLocalDate(endDateStr);
         const list = [];
         
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) return list;
+        if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) return list;
         
-        const current = new Date(start);
+        const current = new Date(start.getTime());
         while (current <= end) {
-            const dateStr = current.toISOString().substring(0, 10);
+            const y = current.getFullYear();
+            const m = String(current.getMonth() + 1).padStart(2, '0');
+            const d = String(current.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
             const holidayName = this.getHoliday(dateStr);
             if (holidayName) {
                 list.push({
@@ -100,16 +114,20 @@ const ThaiHolidays = {
         
         Object.keys(holidays).forEach(monthDay => {
             const dateStr = `${year}-${monthDay}`;
-            const date = new Date(dateStr);
+            const date = this.parseLocalDate(dateStr);
+            if (!date || isNaN(date.getTime())) return;
             const dayOfWeek = date.getDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
             const holidayName = holidays[monthDay];
             
             // Case 1: Holiday is on Tuesday
             // Suggest taking Monday off -> 4-day weekend (Sat, Sun, [Mon], Tue)
             if (dayOfWeek === 2) {
-                const monDate = new Date(date);
+                const monDate = new Date(date.getTime());
                 monDate.setDate(date.getDate() - 1);
-                const monStr = monDate.toISOString().substring(0, 10);
+                const y = monDate.getFullYear();
+                const m = String(monDate.getMonth() + 1).padStart(2, '0');
+                const d = String(monDate.getDate()).padStart(2, '0');
+                const monStr = `${y}-${m}-${d}`;
                 suggestions.push({
                     holidayDate: dateStr,
                     holidayName: holidayName,
@@ -124,9 +142,12 @@ const ThaiHolidays = {
             // Case 2: Holiday is on Thursday
             // Suggest taking Friday off -> 4-day weekend (Thu, [Fri], Sat, Sun)
             if (dayOfWeek === 4) {
-                const friDate = new Date(date);
+                const friDate = new Date(date.getTime());
                 friDate.setDate(date.getDate() + 1);
-                const friStr = friDate.toISOString().substring(0, 10);
+                const y = friDate.getFullYear();
+                const m = String(friDate.getMonth() + 1).padStart(2, '0');
+                const d = String(friDate.getDate()).padStart(2, '0');
+                const friStr = `${y}-${m}-${d}`;
                 suggestions.push({
                     holidayDate: dateStr,
                     holidayName: holidayName,
@@ -141,10 +162,16 @@ const ThaiHolidays = {
             // Case 3: Holiday is on Wednesday
             // Suggest taking Monday + Tuesday OR Thursday + Friday off -> 5-day weekend!
             if (dayOfWeek === 3) {
-                const monDate = new Date(date); monDate.setDate(date.getDate() - 2);
-                const tueDate = new Date(date); tueDate.setDate(date.getDate() - 1);
-                const monStr = monDate.toISOString().substring(0, 10);
-                const tueStr = tueDate.toISOString().substring(0, 10);
+                const monDate = new Date(date.getTime()); monDate.setDate(date.getDate() - 2);
+                const tueDate = new Date(date.getTime()); tueDate.setDate(date.getDate() - 1);
+                const y1 = monDate.getFullYear();
+                const m1 = String(monDate.getMonth() + 1).padStart(2, '0');
+                const d1 = String(monDate.getDate()).padStart(2, '0');
+                const monStr = `${y1}-${m1}-${d1}`;
+                const y2 = tueDate.getFullYear();
+                const m2 = String(tueDate.getMonth() + 1).padStart(2, '0');
+                const d2 = String(tueDate.getDate()).padStart(2, '0');
+                const tueStr = `${y2}-${m2}-${d2}`;
                 suggestions.push({
                     holidayDate: dateStr,
                     holidayName: holidayName,
@@ -162,8 +189,8 @@ const ThaiHolidays = {
 
     // Format YYYY-MM-DD to "D ด.ม. YYYY" (Thai style)
     formatThaiDate: function(dateStr) {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return dateStr;
+        const date = this.parseLocalDate(dateStr);
+        if (!date || isNaN(date.getTime())) return dateStr;
         
         const months = [
             "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",

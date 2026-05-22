@@ -12,11 +12,11 @@ $action = $_GET['action'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'list') {
         try {
-            // 1. Fetch all members of the trip
+            // 1. Fetch all members of the trip (excluding declined ones)
             $stmtMembers = $db->prepare("
                 SELECT u.id, u.name FROM trip_members tm
                 JOIN users u ON tm.user_id = u.id
-                WHERE tm.trip_id = :trip_id ORDER BY u.id ASC
+                WHERE tm.trip_id = :trip_id AND tm.invite_status != 'declined' ORDER BY u.id ASC
             ");
             $stmtMembers->execute(['trip_id' => $trip_id]);
             $members = $stmtMembers->fetchAll();
@@ -236,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         try {
-            $stmtCheck = $db->prepare("SELECT payer_id FROM expenses WHERE id = :id AND trip_id = :trip_id");
+            $stmtCheck = $db->prepare("SELECT payer_id, category FROM expenses WHERE id = :id AND trip_id = :trip_id");
             $stmtCheck->execute(['id' => $expense_id, 'trip_id' => $trip_id]);
             $expense = $stmtCheck->fetch();
             
@@ -244,8 +244,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 sendResponse(['error' => 'ไม่พบข้อมูลค่าใช้จ่ายนี้'], 404);
             }
             
-            if ($ctx['role'] !== 'admin' && (int)$expense['payer_id'] !== $user_id) {
-                sendResponse(['error' => 'คุณไม่มีสิทธิ์ลบค่าใช้จ่ายนี้'], 403);
+            if ($expense['category'] === 'settlement') {
+                $stmtCreditor = $db->prepare("SELECT user_id FROM expense_splits WHERE expense_id = :id");
+                $stmtCreditor->execute(['id' => $expense_id]);
+                $creditor = $stmtCreditor->fetch();
+                $creditor_id = $creditor ? (int)$creditor['user_id'] : 0;
+                
+                if ($ctx['role'] !== 'admin' && $user_id !== $creditor_id) {
+                    sendResponse(['error' => 'เฉพาะเจ้าหนี้ (ผู้รับเงิน) หรือผู้ดูแลระบบเท่านั้นที่สามารถลบรายการเคลียร์เงินนี้ได้'], 403);
+                }
+            } else {
+                if ($ctx['role'] !== 'admin' && (int)$expense['payer_id'] !== $user_id) {
+                    sendResponse(['error' => 'คุณไม่มีสิทธิ์ลบค่าใช้จ่ายนี้'], 403);
+                }
             }
             
             $stmt = $db->prepare("DELETE FROM expenses WHERE id = :id");
@@ -254,6 +265,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             sendResponse(['success' => true, 'message' => 'ลบรายการสำเร็จ']);
         } catch (Exception $e) {
             sendResponse(['error' => 'ลบค่าใช้จ่ายล้มเหลว: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    if ($action === 'settle') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        $from_id = intval($input['from_id'] ?? 0);
+        $to_id = intval($input['to_id'] ?? 0);
+        $amount = floatval($input['amount'] ?? 0);
+        
+        if ($from_id <= 0 || $to_id <= 0 || $amount <= 0) {
+            sendResponse(['error' => 'ข้อมูลการเคลียร์เงินไม่ถูกต้อง'], 400);
+        }
+        
+        if ($ctx['role'] !== 'admin' && $user_id !== $to_id) {
+            sendResponse(['error' => 'คุณไม่มีสิทธิ์ยืนยันการเคลียร์เงินนี้ (เฉพาะผู้รับเงินหรือแอดมินเท่านั้น)'], 403);
+        }
+        
+        $stmtNames = $db->prepare("SELECT id, name FROM users WHERE id IN (:from_id, :to_id)");
+        $stmtNames->execute(['from_id' => $from_id, 'to_id' => $to_id]);
+        $users = $stmtNames->fetchAll();
+        
+        $names = [];
+        foreach ($users as $u) {
+            $names[(int)$u['id']] = $u['name'];
+        }
+        
+        $from_name = $names[$from_id] ?? 'สมาชิก';
+        $to_name = $names[$to_id] ?? 'สมาชิก';
+        
+        $description = "เคลียร์เงิน: " . $from_name . " ชำระให้ " . $to_name;
+        
+        try {
+            $db->beginTransaction();
+            
+            $stmt = $db->prepare("
+                INSERT INTO expenses (trip_id, payer_id, amount, description, category, expense_date) 
+                VALUES (:trip_id, :payer_id, :amount, :description, 'settlement', :expense_date)
+            ");
+            $stmt->execute([
+                'trip_id' => $trip_id,
+                'payer_id' => $from_id,
+                'amount' => $amount,
+                'description' => $description,
+                'expense_date' => date('Y-m-d')
+            ]);
+            $expense_id = $db->lastInsertId();
+            
+            $stmtSplit = $db->prepare("
+                INSERT INTO expense_splits (expense_id, user_id, amount) 
+                VALUES (:expense_id, :user_id, :amount)
+            ");
+            $stmtSplit->execute([
+                'expense_id' => $expense_id,
+                'user_id' => $to_id,
+                'amount' => $amount
+            ]);
+            
+            $db->commit();
+            sendResponse(['success' => true, 'message' => 'บันทึกการเคลียร์เงินสำเร็จ']);
+        } catch (Exception $e) {
+            $db->rollBack();
+            sendResponse(['error' => 'บันทึกการเคลียร์เงินล้มเหลว: ' . $e->getMessage()], 500);
         }
     }
 }

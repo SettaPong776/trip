@@ -34,9 +34,30 @@ let tripDetails = null;
 let tripMembers = [];
 let myTripRole = 'member';
 let globalUsers = [];
+let activeExpenseFilter = 'general'; // 'general' or 'settlement'
 
 // Holidays calendar state
 let holidaysCalYear, holidaysCalMonth;
+
+// Date helpers for timezone-safe local operations
+function parseLocalDate(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+        return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    }
+    const d = new Date(dateStr);
+    d.setHours(0,0,0,0);
+    return d;
+}
+
+function formatLocalDate(date) {
+    if (!date) return "";
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
 
 // ==========================================
 // INITIALIZATION
@@ -258,6 +279,29 @@ function setupEventListeners() {
     // Holidays calendar navigation
     document.getElementById("holidaysPrevMonth").addEventListener("click", () => { holidaysCalMonth--; if (holidaysCalMonth < 0) { holidaysCalMonth = 11; holidaysCalYear--; } renderHolidaysCalendar(); });
     document.getElementById("holidaysNextMonth").addEventListener("click", () => { holidaysCalMonth++; if (holidaysCalMonth > 11) { holidaysCalMonth = 0; holidaysCalYear++; } renderHolidaysCalendar(); });
+    
+    // Toggle between Trip Expenses vs Settlement Payments
+    const btnToggleAllExpenses = document.getElementById("btnToggleAllExpenses");
+    const btnToggleSettlements = document.getElementById("btnToggleSettlements");
+    if (btnToggleAllExpenses && btnToggleSettlements) {
+        btnToggleAllExpenses.addEventListener("click", () => {
+            activeExpenseFilter = 'general';
+            btnToggleAllExpenses.classList.add("active");
+            btnToggleSettlements.classList.remove("active");
+            loadExpenses();
+        });
+        btnToggleSettlements.addEventListener("click", () => {
+            activeExpenseFilter = 'settlement';
+            btnToggleSettlements.classList.add("active");
+            btnToggleAllExpenses.classList.remove("active");
+            loadExpenses();
+        });
+    }
+
+    // Bind currency formatting to inputs
+    bindCommaFormatting(document.getElementById("tripBudget"));
+    bindCommaFormatting(document.getElementById("editTripBudget"));
+    bindCommaFormatting(document.getElementById("expenseAmount"));
 }
 
 // ==========================================
@@ -303,8 +347,8 @@ function showConfirm(message) {
             <h3 class="section-title" style="margin-bottom:10px;font-size:1.2rem;">ยืนยันการทำรายการ</h3>
             <p style="color:var(--text-muted);margin-bottom:24px;font-size:0.9rem;line-height:1.5;">${message}</p>
             <div class="modal-actions" style="justify-content:center;gap:12px;margin-top:0;">
-                <button type="button" class="btn btn-secondary" id="cfmCancel" style="flex:1;">ยกเลิก</button>
                 <button type="button" class="btn btn-primary" id="cfmOk" style="flex:1;">ตกลง</button>
+                <button type="button" class="btn btn-secondary" id="cfmCancel" style="flex:1;">ยกเลิก</button>
             </div></div>`;
         document.body.appendChild(overlay);
         const dismiss = (v) => { overlay.classList.remove('active'); setTimeout(() => { overlay.remove(); resolve(v); }, 250); };
@@ -408,35 +452,58 @@ function renderTripSelector() {
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    // Find closest upcoming trip
+    // Find active trip or closest upcoming trip
     let upcoming = null;
     let minDiff = Infinity;
     
-    currentTrips.forEach(t => {
-        const start = new Date(t.start_date);
-        start.setHours(0,0,0,0);
-        if (start >= today) {
-            const diff = start - today;
-            if (diff < minDiff) {
-                minDiff = diff;
-                upcoming = t;
-            }
-        }
+    const activeTrip = currentTrips.find(t => {
+        if (t.is_canceled == 1) return false;
+        const start = parseLocalDate(t.start_date);
+        const end = parseLocalDate(t.end_date);
+        return today >= start && today <= end;
     });
+    
+    if (activeTrip) {
+        upcoming = activeTrip;
+    } else {
+        currentTrips.forEach(t => {
+            if (t.is_canceled == 1) return;
+            const start = parseLocalDate(t.start_date);
+            if (start > today) {
+                const diff = start - today;
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    upcoming = t;
+                }
+            }
+        });
+        
+        // Fallback to first trip if no active or upcoming uncanceled trip
+        if (!upcoming && currentTrips.length > 0) {
+            upcoming = currentTrips[0];
+        }
+    }
     
     // Render upcoming banner
     if (upcoming) {
-        const start = new Date(upcoming.start_date);
-        const end = new Date(upcoming.end_date);
+        const start = parseLocalDate(upcoming.start_date);
+        const end = parseLocalDate(upcoming.end_date);
         let countdownText = '';
+        let badgeStyle = '';
         
         if (upcoming.is_canceled == 1) {
             countdownText = 'ยกเลิกแล้ว';
+            badgeStyle = 'background:rgba(255, 59, 48, 0.15);color:var(--apple-red);border:1px solid rgba(255,59,48,0.25);box-shadow:none;';
         } else if (today < start) {
             const diff = Math.ceil((start - today) / (1000*60*60*24));
             countdownText = `อีก ${diff} วัน`;
+            badgeStyle = '';
         } else if (today >= start && today <= end) {
-            countdownText = `กำลังเดินทาง`;
+            countdownText = `เริ่มทริป`;
+            badgeStyle = 'background:var(--apple-green);color:white;box-shadow:0 4px 12px rgba(52,199,89,0.3);border:none;';
+        } else {
+            countdownText = `จบทริป`;
+            badgeStyle = 'background:rgba(255, 59, 48, 0.15);color:var(--apple-red);border:1px solid rgba(255,59,48,0.25);box-shadow:none;';
         }
         
         let actionButtonsHtml = '';
@@ -460,8 +527,10 @@ function renderTripSelector() {
         
         bannerContainer.innerHTML = `
             <div class="upcoming-banner" onclick="selectTrip(${upcoming.id})">
-                <div class="upcoming-label">ทริปถัดไป</div>
-                <div class="upcoming-emoji">${upcoming.cover_emoji || '✈️'}</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;position:relative;z-index:1;">
+                    <div class="upcoming-emoji" style="margin-bottom:0;">${upcoming.cover_emoji || '✈️'}</div>
+                    <div class="upcoming-label" style="margin-bottom:0;">ทริปถัดไป</div>
+                </div>
                 <div class="upcoming-title">${upcoming.title}</div>
                 <div class="upcoming-dates">${ThaiHolidays.formatThaiDate(upcoming.start_date)} — ${ThaiHolidays.formatThaiDate(upcoming.end_date)}</div>
                 <div class="upcoming-meta">
@@ -474,7 +543,7 @@ function renderTripSelector() {
                         <strong>${formatCurrency(upcoming.total_budget)}</strong> ฿
                     </div>
                 </div>
-                ${countdownText ? `<div class="countdown-badge" style="${upcoming.is_canceled == 1 ? 'background:rgba(255, 59, 48, 0.15);color:var(--apple-red);border:1px solid rgba(255,59,48,0.25);' : ''}">${countdownText}</div>` : ''}
+                ${countdownText ? `<div class="countdown-badge" style="${badgeStyle}">${countdownText}</div>` : ''}
                 ${actionButtonsHtml}
             </div>`;
             
@@ -504,8 +573,8 @@ function renderTripSelector() {
     
     // Render trip cards
     currentTrips.forEach(t => {
-        const start = new Date(t.start_date);
-        const end = new Date(t.end_date);
+        const start = parseLocalDate(t.start_date);
+        const end = parseLocalDate(t.end_date);
         let statusClass = '', statusText = '';
         
         if (t.is_canceled == 1) {
@@ -516,10 +585,10 @@ function renderTripSelector() {
             statusText = 'กำลังมาถึง';
         } else if (today >= start && today <= end) {
             statusClass = 'trip-status-active';
-            statusText = 'กำลังเดินทาง';
+            statusText = 'เริ่มทริป';
         } else {
             statusClass = 'trip-status-completed';
-            statusText = 'เสร็จสิ้น';
+            statusText = 'จบทริป';
         }
         
         let actionButtonsHtml = '';
@@ -631,7 +700,7 @@ async function handleCreateTrip(e) {
     const title = document.getElementById("tripTitle").value.trim();
     const start_date = document.getElementById("tripStartDate").value;
     const end_date = document.getElementById("tripEndDate").value;
-    const total_budget = document.getElementById("tripBudget").value;
+    const total_budget = parseFloat(document.getElementById("tripBudget").value.replace(/,/g, '')) || 0;
     const cover_emoji = document.getElementById("tripEmoji").value.trim() || '✈️';
     
     // Collect selected member IDs
@@ -729,17 +798,20 @@ function renderDashboard() {
     document.getElementById("welcomeTripDates").textContent = `${ThaiHolidays.formatThaiDate(tripDetails.start_date)} — ${ThaiHolidays.formatThaiDate(tripDetails.end_date)}`;
     
     const today = new Date(); today.setHours(0,0,0,0);
-    const start = new Date(tripDetails.start_date); start.setHours(0,0,0,0);
-    const end = new Date(tripDetails.end_date); end.setHours(0,0,0,0);
+    const start = parseLocalDate(tripDetails.start_date);
+    const end = parseLocalDate(tripDetails.end_date);
     
     const countdownEl = document.getElementById("tripCountdownText");
     if (today < start) {
         const diff = Math.ceil(Math.abs(start - today) / (1000*60*60*24));
         countdownEl.textContent = `อีก ${diff} วันจะออกเดินทาง`;
+        countdownEl.style.color = 'var(--apple-blue)';
     } else if (today >= start && today <= end) {
-        countdownEl.textContent = `กำลังเดินทาง`;
+        countdownEl.textContent = `เริ่มทริป`;
+        countdownEl.style.color = 'var(--apple-green)';
     } else {
-        countdownEl.textContent = `ทริปนี้เสร็จสิ้นแล้ว`;
+        countdownEl.textContent = `จบทริป`;
+        countdownEl.style.color = 'var(--apple-red)';
     }
     
     document.getElementById("statTotalBudget").textContent = `${formatCurrency(tripDetails.total_budget)} ฿`;
@@ -771,6 +843,7 @@ function renderDashboard() {
     addBtns.forEach(b => { if (b) b.style.display = myTripRole === 'admin' ? 'inline-flex' : 'none'; });
     
     tripMembers.forEach(m => {
+        if (m.invite_status === 'declined') return;
         const isSelf = m.id == currentUser.id;
         const card = document.createElement("div");
         card.className = "member-row-card";
@@ -803,7 +876,7 @@ function renderDashboard() {
 // GLOBAL TABS & MEMBERS & TRIP EDIT/DELETE MANAGEMENT
 // ==========================================
 function switchGlobalTab(tabName) {
-    // Global tabs (Trips, Holidays, Members)
+    // Global tabs (Trips, Holidays, Members, Credit)
     document.querySelectorAll(".global-nav-tab-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.tab === tabName);
     });
@@ -820,6 +893,7 @@ function switchGlobalTab(tabName) {
     document.getElementById("tripsTabContent").style.display = "none";
     document.getElementById("holidaysTabContent").style.display = "none";
     document.getElementById("globalMembersTabContent").style.display = "none";
+    document.getElementById("socialCreditTabContent").style.display = "none";
     
     // Hide inside-trip sidebar section
     const sidebarTripSection = document.getElementById("sidebarTripSection");
@@ -851,6 +925,12 @@ function switchGlobalTab(tabName) {
         if (createBtn) createBtn.style.display = "none";
         if (addMemberBtn) addMemberBtn.style.display = isAdmin ? "inline-flex" : "none";
         loadGlobalUsers();
+    } else if (tabName === "credit-tab") {
+        document.getElementById("socialCreditTabContent").style.display = "block";
+        if (topbarTitle) topbarTitle.textContent = "Social Credit Levels";
+        if (createBtn) createBtn.style.display = "none";
+        if (addMemberBtn) addMemberBtn.style.display = "none";
+        loadSocialCredit();
     }
 }
 
@@ -1065,7 +1145,7 @@ async function openEditTrip(tripId) {
         document.getElementById("editTripTitle").value = trip.title;
         document.getElementById("editTripStartDate").value = trip.start_date;
         document.getElementById("editTripEndDate").value = trip.end_date;
-        document.getElementById("editTripBudget").value = trip.total_budget;
+        document.getElementById("editTripBudget").value = formatCurrency(trip.total_budget);
         document.getElementById("editTripEmoji").value = trip.cover_emoji || '✈️';
         
         const currentMemberIds = members.map(m => m.id);
@@ -1083,7 +1163,7 @@ async function handleEditTrip(e) {
     const title = document.getElementById("editTripTitle").value.trim();
     const start_date = document.getElementById("editTripStartDate").value;
     const end_date = document.getElementById("editTripEndDate").value;
-    const total_budget = document.getElementById("editTripBudget").value;
+    const total_budget = parseFloat(document.getElementById("editTripBudget").value.replace(/,/g, '')) || 0;
     const cover_emoji = document.getElementById("editTripEmoji").value.trim() || '✈️';
     
     // Collect selected member IDs
@@ -1246,6 +1326,18 @@ function renderKanbanBoard() {
 }
 
 async function updateInviteStatus(userId, status) {
+    // If declining from accepted status, show a warning about credit penalty
+    if (status === 'declined') {
+        // Check if user is currently accepted
+        const member = tripMembers.find(m => m.id == userId);
+        if (member && member.invite_status === 'accepted') {
+            const confirmed = await showConfirm(
+                `⚠️ คำเตือน! หากปฏิเสธหลังจากตอบรับแล้ว จะถือว่า "เททริป/บิด"\n\nSocial Credit ของคุณจะถูกหัก -10 คะแนนทันที\n\nยืนยันจะปฏิเสธหรือไม่?`
+            );
+            if (!confirmed) return;
+        }
+    }
+    
     try {
         const res = await fetch("api/trip.php?action=update_invite_status", {
             method: "POST", headers: { "Content-Type": "application/json" },
@@ -1253,13 +1345,28 @@ async function updateInviteStatus(userId, status) {
         });
         const data = await res.json();
         if (data.success) {
-            showToast("อัปเดตสถานะสำเร็จ", "success");
+            // Show credit change notification
+            if (data.credit_change && data.credit_change !== 0) {
+                const changeText = data.credit_change > 0 ? `+${data.credit_change}` : `${data.credit_change}`;
+                const changeType = data.credit_change > 0 ? 'success' : 'warning';
+                showToast(`อัปเดตสถานะสำเร็จ | Social Credit ${changeText} คะแนน`, changeType);
+            } else {
+                showToast("อัปเดตสถานะสำเร็จ", "success");
+            }
             // Refresh members data
             const detailsRes = await fetch("api/trip.php?action=details");
             const detailsData = await detailsRes.json();
             if (!detailsData.error) {
                 tripMembers = detailsData.members;
                 renderKanbanBoard();
+                
+                // Update local member_count in global trips array and refresh dashboard
+                const newCount = tripMembers.filter(m => m.invite_status === 'accepted').length;
+                const tripInGlobal = currentTrips.find(t => t.id === activeTripId);
+                if (tripInGlobal) {
+                    tripInGlobal.member_count = newCount;
+                }
+                renderDashboard();
             }
         } else showToast(data.error, "error");
     } catch (err) { console.error(err); }
@@ -1274,11 +1381,22 @@ async function loadExpenses() {
         const data = await res.json();
         if (data.error) { showToast(data.error, "error"); return; }
         
-        renderExpensesList(data.expenses);
+        const filteredExpenses = data.expenses.filter(e => {
+            if (activeExpenseFilter === 'settlement') {
+                return e.category === 'settlement';
+            } else {
+                return e.category !== 'settlement';
+            }
+        });
+        renderExpensesList(filteredExpenses);
         renderBalancesAndSettlements(data.balances, data.settlements);
         
         let totalSpent = 0;
-        data.expenses.forEach(e => totalSpent += parseFloat(e.amount));
+        data.expenses.forEach(e => {
+            if (e.category !== 'settlement') {
+                totalSpent += parseFloat(e.amount);
+            }
+        });
         document.getElementById("statSpentTotal").textContent = `${formatCurrency(totalSpent)} ฿`;
         
         const remaining = tripDetails.total_budget - totalSpent;
@@ -1304,25 +1422,35 @@ function renderExpensesList(expenses) {
     container.innerHTML = "";
     
     if (expenses.length === 0) {
+        const emptyText = activeExpenseFilter === 'settlement' ? "ยังไม่มีรายการเคลียร์เงิน" : "ยังไม่มีค่าใช้จ่าย";
         container.innerHTML = `<div class="empty-state">
             <div class="empty-state-icon" style="margin-bottom:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--apple-gray-4);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="12"></line><line x1="2" y1="10" x2="22" y2="10"></line></svg>
             </div>
-            <div class="empty-state-text">ยังไม่มีค่าใช้จ่าย</div>
+            <div class="empty-state-text">${emptyText}</div>
         </div>`;
         return;
     }
     
-    const catIcons = { food: svgFood, travel: svgTravel, hotel: svgHotel, shopping: svgShopping, general: svgGeneral };
-    const catNames = { food:"ค่าอาหาร", travel:"ค่าเดินทาง", hotel:"ค่าที่พัก", shopping:"ช้อปปิ้ง", general:"ทั่วไป" };
+    const svgSettlement = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line><polyline points="12 14 14 16 18 12"></polyline></svg>`;
+    const catIcons = { food: svgFood, travel: svgTravel, hotel: svgHotel, shopping: svgShopping, general: svgGeneral, settlement: svgSettlement };
+    const catNames = { food:"ค่าอาหาร", travel:"ค่าเดินทาง", hotel:"ค่าที่พัก", shopping:"ช้อปปิ้ง", general:"ทั่วไป", settlement:"เคลียร์เงิน" };
     
     expenses.forEach(e => {
         const splitsNames = e.splits.map(s => s.user_name).join(", ");
-        const canDelete = myTripRole === 'admin' || e.payer_id == currentUser.id;
+        
+        let canDelete = false;
+        if (e.category === 'settlement') {
+            const creditorId = e.splits && e.splits.length > 0 ? e.splits[0].user_id : null;
+            canDelete = myTripRole === 'admin' || creditorId == currentUser.id;
+        } else {
+            canDelete = myTripRole === 'admin' || e.payer_id == currentUser.id;
+        }
+        
         const deleteBtn = canDelete ? `<button class="btn-icon" onclick="deleteExpense(${e.id})" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;" title="ลบ">${iconDeleteSvg}</button>` : "";
         
         const card = document.createElement("div");
-        card.className = "expense-item";
+        card.className = "expense-item" + (e.category === 'settlement' ? " is-settlement-item" : "");
         card.innerHTML = `
             <div class="expense-left">
                 <div class="expense-icon-box cat-${e.category}" style="display:inline-flex;align-items:center;justify-content:center;">${catIcons[e.category] || svgGeneral}</div>
@@ -1366,6 +1494,13 @@ function renderBalancesAndSettlements(balances, settlements) {
     }
     
     settlements.forEach(s => {
+        const isCreditor = currentUser.id == s.to_id;
+        const isAdmin = myTripRole === 'admin';
+        let confirmBtnHtml = "";
+        if (isCreditor || isAdmin) {
+            confirmBtnHtml = `<button type="button" class="btn btn-xs btn-settle-confirm" onclick="confirmSettlement(${s.from_id}, ${s.to_id}, ${s.amount})">ยืนยันได้รับเงิน</button>`;
+        }
+        
         const row = document.createElement("div");
         row.className = "settlement-row";
         row.innerHTML = `
@@ -1377,6 +1512,7 @@ function renderBalancesAndSettlements(balances, settlements) {
             <div style="display:flex;align-items:center;gap:10px;">
                 <span class="settle-amount">${formatCurrency(s.amount)} ฿</span>
                 <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('โอนเงินค่าทริปให้ ${s.to_name} จำนวน ${formatCurrency(s.amount)} บาท');showToast('คัดลอกแล้ว','success');" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconCopySvg}</button>
+                ${confirmBtnHtml}
             </div>`;
         sc.appendChild(row);
     });
@@ -1386,13 +1522,14 @@ function openAddExpenseModal() {
     const payerSelect = document.getElementById("expensePayer");
     payerSelect.innerHTML = "";
     tripMembers.forEach(m => {
+        if (m.invite_status === 'declined') return;
         const opt = document.createElement("option");
         opt.value = m.id;
         opt.textContent = m.name;
         if (m.id == currentUser.id) opt.selected = true;
         payerSelect.appendChild(opt);
     });
-    document.getElementById("expenseDate").value = new Date().toISOString().substring(0, 10);
+    document.getElementById("expenseDate").value = formatLocalDate(new Date());
     generateSplitCheckboxList();
     openModal("addExpenseModal");
 }
@@ -1403,21 +1540,29 @@ function generateSplitCheckboxList() {
     const type = document.getElementById("expenseSplitType").value;
     
     tripMembers.forEach(m => {
+        if (m.invite_status === 'declined') return;
         const div = document.createElement("div");
         div.className = "custom-split-item";
         if (type === "equal") {
             div.innerHTML = `<label class="checkbox-label" style="margin:0;"><input type="checkbox" class="expense-split-checkbox" value="${m.id}" checked><span class="checkbox-custom"></span><span>${m.name}</span></label>`;
         } else {
-            div.innerHTML = `<div style="font-weight:500;">${m.name}</div><div style="display:flex;align-items:center;gap:4px;"><input type="number" step="0.01" class="form-input custom-split-amount" data-user-id="${m.id}" placeholder="0.00" style="width:100px;padding:6px 10px;"><span style="font-size:0.85rem;color:var(--text-muted);">฿</span></div>`;
+            div.innerHTML = `<div style="font-weight:500;">${m.name}</div><div style="display:flex;align-items:center;gap:4px;"><input type="text" inputmode="decimal" class="form-input custom-split-amount" data-user-id="${m.id}" placeholder="0.00" style="width:100px;padding:6px 10px;"><span style="font-size:0.85rem;color:var(--text-muted);">฿</span></div>`;
         }
         list.appendChild(div);
     });
+    
+    if (type !== "equal") {
+        list.querySelectorAll(".custom-split-amount").forEach(input => {
+            bindCommaFormatting(input);
+        });
+    }
 }
 
 async function handleAddExpenseSubmit(e) {
     e.preventDefault();
     const description = document.getElementById("expenseDescription").value.trim();
-    const amount = parseFloat(document.getElementById("expenseAmount").value);
+    const amountVal = document.getElementById("expenseAmount").value.replace(/,/g, '');
+    const amount = parseFloat(amountVal);
     const payer_id = parseInt(document.getElementById("expensePayer").value);
     const category = document.getElementById("expenseCategory").value;
     const expense_date = document.getElementById("expenseDate").value;
@@ -1433,7 +1578,7 @@ async function handleAddExpenseSubmit(e) {
     } else {
         let sum = 0;
         document.querySelectorAll(".custom-split-amount").forEach(input => {
-            const amt = parseFloat(input.value) || 0;
+            const amt = parseFloat(input.value.replace(/,/g, '')) || 0;
             if (amt > 0) { splits.push({ user_id: parseInt(input.dataset.userId), amount: amt }); sum += amt; }
         });
         if (Math.abs(sum - amount) > 0.05) { showToast(`ยอดรวม (${sum.toFixed(2)}) ไม่ตรงกับค่าใช้จ่าย (${amount.toFixed(2)})`, "warning"); return; }
@@ -1445,7 +1590,19 @@ async function handleAddExpenseSubmit(e) {
             body: JSON.stringify({ description, amount, payer_id, category, expense_date, split_type, splits })
         });
         const data = await res.json();
-        if (data.success) { closeModal("addExpenseModal"); document.getElementById("addExpenseForm").reset(); loadExpenses(); showToast("บันทึกสำเร็จ", "success"); }
+        if (data.success) {
+            closeModal("addExpenseModal");
+            document.getElementById("addExpenseForm").reset();
+            activeExpenseFilter = 'general';
+            const btnAll = document.getElementById("btnToggleAllExpenses");
+            const btnSettle = document.getElementById("btnToggleSettlements");
+            if (btnAll && btnSettle) {
+                btnAll.classList.add("active");
+                btnSettle.classList.remove("active");
+            }
+            loadExpenses();
+            showToast("บันทึกสำเร็จ", "success");
+        }
         else showToast(data.error, "error");
     } catch (err) { console.error(err); }
 }
@@ -1483,10 +1640,13 @@ async function loadItinerary() {
 
 function generateTripDates() {
     tripDatesList = [];
-    const start = new Date(tripDetails.start_date);
-    const end = new Date(tripDetails.end_date);
-    const cur = new Date(start);
-    while (cur <= end) { tripDatesList.push(cur.toISOString().substring(0, 10)); cur.setDate(cur.getDate() + 1); }
+    const start = parseLocalDate(tripDetails.start_date);
+    const end = parseLocalDate(tripDetails.end_date);
+    const cur = new Date(start.getTime());
+    while (cur <= end) { 
+        tripDatesList.push(formatLocalDate(cur)); 
+        cur.setDate(cur.getDate() + 1); 
+    }
 }
 
 function renderDayFilters() {
@@ -1601,7 +1761,7 @@ function renderCalendarView(itineraries) {
     const grid = document.getElementById("calendarGridDays");
     grid.innerHTML = "";
     
-    const baseDate = new Date(tripDetails.start_date);
+    const baseDate = parseLocalDate(tripDetails.start_date);
     const year = baseDate.getFullYear();
     const month = baseDate.getMonth();
     
@@ -1611,7 +1771,7 @@ function renderCalendarView(itineraries) {
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
     const prevDays = new Date(year, month, 0).getDate();
-    const todayStr = new Date().toISOString().substring(0, 10);
+    const todayStr = formatLocalDate(new Date());
     
     for (let i = firstDay - 1; i >= 0; i--) {
         const cell = document.createElement("div");
@@ -1752,6 +1912,7 @@ function openAddChecklistModal() {
     const sel = document.getElementById("checklistAssignMember");
     sel.innerHTML = `<option value="">-- ใครก็ได้ --</option>`;
     tripMembers.forEach(m => {
+        if (m.invite_status === 'declined') return;
         const opt = document.createElement("option");
         opt.value = m.id;
         opt.textContent = m.name;
@@ -1815,7 +1976,7 @@ function renderHolidaysCalendar() {
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
     const prevDays = new Date(year, month, 0).getDate();
-    const todayStr = new Date().toISOString().substring(0, 10);
+    const todayStr = formatLocalDate(new Date());
     
     for (let i = firstDay - 1; i >= 0; i--) {
         const cell = document.createElement("div");
@@ -1894,15 +2055,613 @@ function renderLeaveSuggestions() {
 }
 
 // ==========================================
+// SOCIAL CREDIT LEVELS
+// ==========================================
+// ==========================================
+// SOCIAL CREDIT LEVELS
+// ==========================================
+const CREDIT_LEVELS = [
+    { name: 'Trusted',    grade: 'AAA', min: 91, max: 100, thaiName: 'เชื่อถือได้สูงสุด', colorClass: 'credit-trusted', behavior: 'มีส่วนร่วมดีเด่น ช่วยเหลือเพื่อนร่วมทริป จ่ายค่าใช้จ่ายตรงเวลา มีความเป็นผู้นำสูง' },
+    { name: 'Admired',    grade: 'AA',  min: 80, max: 90,  thaiName: 'เป็นที่ชื่นชม', colorClass: 'credit-admired', behavior: 'ร่วมกิจกรรมกลุ่มสม่ำเสมอ ตอบแชทยืนยันรวดเร็ว ช่วยหาสถานที่และร่วมเสนอไอเดียที่เป็นประโยชน์' },
+    { name: 'Respected',  grade: 'A',   min: 61, max: 79,  thaiName: 'เป็นที่ยอมรับ', colorClass: 'credit-respected', behavior: 'ตอบรับหรือปฏิเสธทริปชัดเจน ตรงต่อเวลานัดหมาย ให้ความร่วมมือที่ดีในกิจกรรม' },
+    { name: 'Neutral',    grade: 'B',   min: 41, max: 60,  thaiName: 'ปกติ (เริ่มต้น)', colorClass: 'credit-neutral', behavior: 'เกณฑ์เริ่มต้นสำหรับสมาชิกใหม่ มีส่วนร่วมทั่วไปในระดับปกติ ไม่มีประวัติการละเลยหน้าที่' },
+    { name: 'Distrusted', grade: 'C',   min: 21, max: 40,  thaiName: 'ไม่น่าเชื่อถือ', colorClass: 'credit-distrusted', behavior: 'ตอบแชทกำกวมหรือไม่ชัดเจน อ่านแชทสำคัญแต่ไม่ยอมโหวต/ตอบ ทำงานช้าหรืออ่านไม่ตอบบ่อยครั้ง' },
+    { name: 'Unpopular',  grade: 'D',   min: 0,  max: 20,  thaiName: 'ไม่ได้รับความไว้วางใจ/บิดบ่อย', colorClass: 'credit-unpopular', behavior: 'มีประวัติยกเลิกทริปกระทันหัน (เททริป/บิด) ขาดการติดต่อรุนแรง ไม่รับผิดชอบต่อส่วนรวม' }
+];
+
+const CREDIT_ACTIONS = [
+    { key: 'largeup',   label: '+10', amount: 10,  desc: 'เลี้ยง จ่ายค่าต่างๆ เข้าร่วมกิจกรรม มีส่วนร่วม ช่วยเหลือ', btnClass: 'credit-btn-largeup' },
+    { key: 'up',        label: '+5',  amount: 5,   desc: 'ตอบแชทยืนยันชัดเจน ตรงเวลา ช่วยหาสถานที่ เสนอไอเดีย', btnClass: 'credit-btn-up' },
+    { key: 'down',      label: '-5',  amount: -5,  desc: 'ตอบกำกวม ไม่ยอมโหวต/ตอบ ทำอะไรช้า อ่านไม่ตอบ', btnClass: 'credit-btn-down' },
+    { key: 'largedown', label: '-10', amount: -10, desc: 'เททริป/บิด ขาดการติดต่อ ไม่ชัดเจน กวนตีน', btnClass: 'credit-btn-largedown' }
+];
+
+function getCreditLevelIcon(levelName) {
+    const baseSvg = (innerContent, className) => {
+        return `<svg class="credit-level-icon ${className}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.05"/>
+            ${innerContent}
+        </svg>`;
+    };
+
+    switch (levelName) {
+        case 'Trusted': // Tier AAA: Shield with double ring/verified checkmark + small crown/star shape inside
+            return baseSvg(`
+                <path d="m8 11.5 2.5 2.5 5.5 -5.5" stroke-width="2.5"/>
+                <path d="M12 4.5l1 2 2.2 .3-1.6 1.6 .4 2.2-2-1-2 1 .4-2.2-1.6-1.6 2.2-.3z" fill="currentColor" stroke="none"/>
+            `, 'icon-trusted');
+        case 'Admired': // Tier AA: Shield with star inside
+            return baseSvg(`
+                <polygon points="12 7 13.5 10 17 10.5 14.5 13 15.5 16.5 12 14.5 8.5 16.5 9.5 13 7 10.5 10.5 10"/>
+            `, 'icon-admired');
+        case 'Respected': // Tier A: Shield with checkmark
+            return baseSvg(`
+                <path d="m8 11 2.5 2.5 5.5 -5.5" stroke-width="2.5"/>
+            `, 'icon-respected');
+        case 'Neutral': // Tier B: Shield with horizontal balance bar
+            return baseSvg(`
+                <line x1="8" y1="12" x2="16" y2="12" stroke-width="2.5"/>
+            `, 'icon-neutral');
+        case 'Distrusted': // Tier C: Shield with warning exclamation mark
+            return baseSvg(`
+                <line x1="12" y1="7.5" x2="12" y2="13" stroke-width="2.5"/>
+                <line x1="12" y1="16.5" x2="12.01" y2="16.5" stroke-width="3" stroke-linecap="round"/>
+            `, 'icon-distrusted');
+        case 'Unpopular': // Tier D: Shield with block X
+            return baseSvg(`
+                <line x1="9" y1="9" x2="15" y2="15" stroke-width="2.5"/>
+                <line x1="15" y1="9" x2="9" y2="15" stroke-width="2.5"/>
+            `, 'icon-unpopular');
+        default:
+            return '';
+    }
+}
+
+function getCreditLevel(score) {
+    for (const level of CREDIT_LEVELS) {
+        if (score >= level.min && score <= level.max) return level;
+    }
+    return CREDIT_LEVELS[CREDIT_LEVELS.length - 1];
+}
+
+async function loadSocialCredit() {
+    const container = document.getElementById('socialCreditContainer');
+    if (!container) return;
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);">กำลังเรียกดูรายงานประเมินเครดิตสังคม...</div>`;
+    
+    try {
+        const res = await fetch('api/social_credit.php?action=list');
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); return; }
+        renderSocialCredit(data.users || []);
+    } catch (err) {
+        console.error('Failed to load social credit', err);
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--danger);">เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ระบบเครดิต</div>`;
+    }
+}
+
+function renderSocialCredit(users) {
+    const container = document.getElementById('socialCreditContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const isAdmin = currentUser.role === 'admin';
+    
+    // Calculations for Stats
+    const totalScore = users.reduce((sum, u) => sum + (u.social_credit ?? 50), 0);
+    const avgScore = users.length > 0 ? Math.round(totalScore / users.length) : 50;
+    const avgLevel = getCreditLevel(avgScore);
+    
+    const selfUser = users.find(u => u.id == currentUser.id);
+    const selfScore = selfUser ? (selfUser.social_credit ?? 50) : 50;
+    const selfLevel = getCreditLevel(selfScore);
+    const selfRank = users.findIndex(u => u.id == currentUser.id) + 1;
+    
+    // Good Standing rate (score >= 61 / Respected)
+    const goodCreditUsers = users.filter(u => (u.social_credit ?? 50) >= 61).length;
+    const goodCreditPct = users.length > 0 ? Math.round((goodCreditUsers / users.length) * 100) : 100;
+    
+    // Stats Summary Row
+    const statsRow = document.createElement('div');
+    statsRow.className = 'credit-stats-row';
+    statsRow.innerHTML = `
+        <div class="glass-panel credit-stats-card stats-card-avg">
+            <div class="credit-stats-icon stats-group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="credit-stats-info">
+                <span class="credit-stats-label">คะแนนเฉลี่ยกลุ่ม</span>
+                <div class="credit-stats-value-row">
+                    <span class="credit-stats-value">${avgScore}</span>
+                    <span class="credit-stats-unit">/100</span>
+                </div>
+                <span class="credit-stats-subtext ${avgLevel.colorClass}">ระดับ: ${avgLevel.thaiName}</span>
+            </div>
+        </div>
+        
+        <div class="glass-panel credit-stats-card stats-card-user">
+            <div class="credit-stats-icon stats-user">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="credit-stats-info">
+                <span class="credit-stats-label">คะแนนความน่าเชื่อถือของคุณ</span>
+                <div class="credit-stats-value-row">
+                    <span class="credit-stats-value">${selfScore}</span>
+                    <span class="credit-stats-unit">/100</span>
+                </div>
+                <span class="credit-stats-subtext ${selfLevel.colorClass}">ระดับ: ${selfLevel.thaiName} (อันดับ #${selfRank > 0 ? selfRank : '-'})</span>
+            </div>
+        </div>
+
+        <div class="glass-panel credit-stats-card stats-card-index">
+            <div class="credit-stats-icon stats-index">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="credit-stats-info">
+                <span class="credit-stats-label">ดัชนีวินัยสมาชิก (Good Standing)</span>
+                <div class="credit-stats-value-row">
+                    <span class="credit-stats-value">${goodCreditPct}</span>
+                    <span class="credit-stats-unit">%</span>
+                </div>
+                <span class="credit-stats-subtext credit-respected">ระดับดีขึ้นไป ${goodCreditUsers} จากทั้งหมด ${users.length} คน</span>
+            </div>
+        </div>
+    `;
+    container.appendChild(statsRow);
+    
+    // Level Legend Panel (Official scales in grid format)
+    const legendPanel = document.createElement('div');
+    legendPanel.className = 'glass-panel credit-legend-panel';
+    legendPanel.innerHTML = `
+        <div class="credit-legend-header">
+            <div class="credit-legend-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--apple-blue);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg>
+                <h2 class="section-title">มาตรฐานเกณฑ์คะแนนเครดิต (Official Social Credit Rating Scale)</h2>
+            </div>
+            <p class="credit-legend-subtitle">เกณฑ์การจัดอันดับความน่าเชื่อถือและการร่วมกิจกรรมในกลุ่มเพื่อนเพื่อการประเมินผลเชิงพฤติกรรมอย่างมีมาตรฐาน</p>
+        </div>
+        <div class="credit-levels-scale">
+            ${CREDIT_LEVELS.map(l => `
+                <div class="credit-level-scale-item ${l.colorClass}">
+                    <div class="scale-item-header">
+                        <div class="scale-item-badge-group">
+                            <span class="scale-status-icon">${getCreditLevelIcon(l.name)}</span>
+                            <span class="scale-status-text">${l.thaiName}</span>
+                        </div>
+                        <span class="scale-range-pill">${l.min} - ${l.max} คะแนน</span>
+                    </div>
+                    <div class="scale-item-body">
+                        <p class="scale-cell-behavior">${l.behavior}</p>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    container.appendChild(legendPanel);
+    
+    // Members Credit List (Leaderboard Table)
+    const membersPanel = document.createElement('div');
+    membersPanel.className = 'glass-panel credit-members-panel';
+    membersPanel.innerHTML = `
+        <div class="section-header" style="margin-bottom: 20px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--apple-indigo);"><path d="M12 20h9"/><path d="M3 20v-8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8"/><path d="M11 20v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4"/></svg>
+                <h2 class="section-title">ตารางการจัดอันดับสมาชิกกลุ่ม (Leaderboard)</h2>
+            </div>
+            <span class="credit-member-count">สมาชิกทั้งหมด ${users.length} คน</span>
+        </div>
+        <div class="credit-table-responsive">
+            <table class="credit-leaderboard-table">
+                <thead>
+                    <tr>
+                        <th class="col-rank" style="width: 75px; text-align: center;">อันดับ</th>
+                        <th class="col-member">รายชื่อสมาชิก</th>
+                        <th class="col-rating" style="width: 175px;">สถานะประเมิน</th>
+                        <th class="col-progress">คะแนน & ดัชนีความก้าวหน้า</th>
+                        <th class="col-actions" style="width: 240px; text-align: right;">การจัดการเครดิต</th>
+                    </tr>
+                </thead>
+                <tbody id="creditMembersTableBody"></tbody>
+            </table>
+        </div>
+    `;
+    container.appendChild(membersPanel);
+    
+    const tbody = membersPanel.querySelector('#creditMembersTableBody');
+    
+    if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state" style="text-align:center;padding:40px;color:var(--text-muted);">ยังไม่มีสมาชิกในระบบ</td></tr>`;
+        return;
+    }
+    
+    users.forEach((u, index) => {
+        const credit = u.social_credit ?? 50;
+        const level = getCreditLevel(credit);
+        const isSelf = u.id == currentUser.id;
+        const rankNum = index + 1;
+        
+        let rankBadge = '';
+        if (rankNum === 1) rankBadge = `<span class="badge-rank badge-rank-1">01</span>`;
+        else if (rankNum === 2) rankBadge = `<span class="badge-rank badge-rank-2">02</span>`;
+        else if (rankNum === 3) rankBadge = `<span class="badge-rank badge-rank-3">03</span>`;
+        else rankBadge = `<span class="badge-rank badge-rank-other">${rankNum < 10 ? '0' + rankNum : rankNum}</span>`;
+        
+        const tr = document.createElement('tr');
+        tr.className = `credit-member-row ${level.colorClass} ${isSelf ? 'is-self' : ''}`;
+        tr.style.animationDelay = `${index * 0.05}s`;
+        
+        // Actions
+        let actionButtons = '';
+        if (isAdmin) {
+            actionButtons = `
+                <div class="credit-actions-cell">
+                    <button type="button" class="btn-table-action btn-history" onclick="showCreditHistoryModal(${u.id}, '${u.name}')" title="ตรวจสอบรายงานตรวจสอบประวัติเครดิต">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        <span>ประวัติ</span>
+                    </button>
+                    <div class="credit-quick-adjust-group">
+                        ${CREDIT_ACTIONS.map(a => `
+                            <button type="button" class="credit-mini-adjust-btn ${a.btnClass}" 
+                                onclick="adjustSocialCredit(${u.id}, ${a.amount}, '${a.desc.substring(0, 30)}')" 
+                                title="${a.desc}">
+                                ${a.label}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        } else {
+            actionButtons = `
+                <div class="credit-actions-cell">
+                    <button type="button" class="btn-table-action btn-history" onclick="showCreditHistoryModal(${u.id}, '${u.name}')" title="ตรวจสอบรายงานตรวจสอบประวัติเครดิต">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        <span>ประวัติ</span>
+                    </button>
+                </div>
+            `;
+        }
+        
+        tr.innerHTML = `
+            <td class="col-rank" style="text-align: center;">${rankBadge}</td>
+            <td class="col-member">
+                <div class="credit-member-info">
+                    <div class="credit-member-avatar">${u.name.substring(0, 2).toUpperCase()}</div>
+                    <div class="credit-member-names">
+                        <div class="credit-member-name">
+                            ${u.name}
+                            ${isSelf ? ' <span class="credit-self-tag">คุณ</span>' : ''}
+                        </div>
+                        <div class="credit-member-role">${u.role === 'admin' ? 'ผู้ดูแลระบบ (Admin)' : 'สมาชิกทั่วไป (Member)'}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="col-rating">
+                <div class="credit-level-rating-badge ${level.colorClass}">
+                    ${getCreditLevelIcon(level.name)}
+                    <span class="rating-name-tag">${level.thaiName}</span>
+                </div>
+            </td>
+            <td class="col-progress">
+                <div class="credit-progress-cell">
+                    <div class="credit-score-num-display">
+                        <span class="credit-score-num">${credit}</span>
+                        <span class="credit-score-slash">/100 คะแนน</span>
+                    </div>
+                    <div class="credit-table-progress-bar">
+                        <div class="credit-table-progress-fill ${level.colorClass}" style="width: ${credit}%"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="col-actions">${actionButtons}</td>
+        `;
+        
+        tbody.appendChild(tr);
+    });
+}
+
+async function adjustSocialCredit(userId, amount, desc) {
+    // Show reason input prompt
+    const reasonOptions = {
+        10: ['เลี้ยงสมาชิก/เพื่อนร่วมทริป', 'ช่วยออกค่าใช้จ่ายทริปเพิ่มเติม', 'เข้าร่วมกิจกรรมกลุ่มอย่างเต็มที่', 'ช่วยเหลือเพื่อนร่วมทริปในสถานการณ์สำคัญ', 'มีบทบาทสำคัญในการขับเคลื่อนทริป'],
+        5: ['ตอบแชทยืนยันชัดเจนทันที', 'ตรงต่อเวลานัดหมาย', 'ช่วยหาสถานที่หรือร้านอาหาร', 'เสนอไอเดียและแผนงานที่เป็นประโยชน์', 'ช่วยบริหารจัดการและประสานงาน'],
+        '-5': ['ตอบแชทกำกวมหรือไม่ชัดเจน', 'อ่านแชทสำคัญแต่ไม่ร่วมโหวตหรือตอบกลับ', 'ทำงานหรือมีส่วนร่วมล่าช้าผิดปกติ', 'ละเลยการทำหน้าที่ที่ได้รับมอบหมาย', 'อ่านไม่ตอบเป็นเวลานาน'],
+        '-10': ['ยกเลิกการร่วมทริปกระทันหัน (เททริป/บิด)', 'ขาดการติดต่อหรือหายตัวไปโดยไม่แจ้งล่วงหน้า', 'ไม่รับผิดชอบต่อภาระค่าใช้จ่ายที่เกิดขึ้นจริง', 'มีพฤติกรรมขัดแย้งเชิงลบต่อส่วนรวม']
+    };
+    const reasons = reasonOptions[amount] || [desc];
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.innerHTML = `
+        <div class="modal-card glass-panel" style="max-width:440px;padding:28px;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;border-bottom:1px solid var(--border-subtle);padding-bottom:14px;">
+                <div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+                    background:${amount > 0 ? 'rgba(52,199,89,0.08)' : 'rgba(255,59,48,0.08)'};
+                    color:${amount > 0 ? 'var(--apple-green)' : 'var(--apple-red)'};
+                    border: 1px solid ${amount > 0 ? 'rgba(52,199,89,0.15)' : 'rgba(255,59,48,0.15)'};
+                    font-weight:700;">${amount > 0 ? '+' + amount : amount}</div>
+                <div>
+                    <h3 class="section-title" style="font-size:1.1rem;margin-bottom:2px;">ปรับเปลี่ยนคะแนนเครดิต</h3>
+                    <p style="font-size:0.8rem;color:var(--text-muted);">บันทึกเหตุผลประกอบรายการให้เป็นทางการ</p>
+                </div>
+            </div>
+            <div class="credit-reason-list" id="creditReasonList">
+                ${reasons.map((r, i) => `
+                    <label class="credit-reason-option">
+                        <input type="radio" name="creditReason" value="${r}" ${i === 0 ? 'checked' : ''}>
+                        <span class="credit-reason-text">${r}</span>
+                    </label>
+                `).join('')}
+                <div style="margin-top:12px;">
+                    <input type="text" id="creditCustomReason" class="form-input" placeholder="พิมพ์เหตุผลอ้างอิงกรณีอื่นๆ..." style="font-size:0.85rem; width:100%;">
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top:24px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn btn-secondary" id="creditAdjustCancel" style="padding: 9px 18px;">ยกเลิก</button>
+                <button type="button" class="btn btn-primary" id="creditAdjustConfirm" style="padding: 9px 18px; background:${amount > 0 ? 'var(--apple-green)' : 'var(--apple-red)'}; border-color:${amount > 0 ? 'var(--apple-green)' : 'var(--apple-red)'};">ยืนยันรายการ</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    
+    return new Promise((resolve) => {
+        const dismiss = () => {
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.remove(), 250);
+        };
+        
+        overlay.querySelector('#creditAdjustCancel').onclick = () => { dismiss(); resolve(); };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) { dismiss(); resolve(); } });
+        
+        overlay.querySelector('#creditAdjustConfirm').onclick = async () => {
+            const customReason = document.getElementById('creditCustomReason').value.trim();
+            const selectedRadio = overlay.querySelector('input[name="creditReason"]:checked');
+            const reason = customReason || (selectedRadio ? selectedRadio.value : desc);
+            
+            dismiss();
+            
+            try {
+                const res = await fetch('api/social_credit.php?action=adjust', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, change_amount: amount, reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const changeText = amount > 0 ? `+${amount}` : `${amount}`;
+                    showToast(`บันทึกการปรับเครดิตสำเร็จ (${changeText})`, amount > 0 ? 'success' : 'warning');
+                    loadSocialCredit();
+                } else {
+                    showToast(data.error || 'บันทึกรายการปรับเครดิตล้มเหลว', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย', 'error');
+            }
+            resolve();
+        };
+    });
+}
+
+async function showCreditHistoryModal(userId, userName) {
+    // Show loading indicator
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.innerHTML = `
+        <div class="modal-card glass-panel" style="max-width:520px;padding:28px;max-height:85vh;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--border-subtle);padding-bottom:14px;">
+                <h3 class="section-title" style="font-size:1.1rem;display:flex;align-items:center;gap:10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--apple-blue);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    รายงานตรวจสอบเครดิต: ${userName}
+                </h3>
+                <button type="button" class="btn-close-modal" id="creditHistoryClose" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.35rem;line-height:1;padding:4px;">&times;</button>
+            </div>
+            <div id="creditHistoryLogsList" style="flex:1;overflow-y:auto;padding-right:4px;">
+                <div style="text-align:center;padding:20px;color:var(--text-muted);">กำลังค้นหารายงานธุรกรรมเครดิต...</div>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const closeBtn = overlay.querySelector('#creditHistoryClose');
+    const dismiss = () => {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 250);
+    };
+    closeBtn.onclick = dismiss;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) dismiss(); });
+
+    try {
+        const res = await fetch(`api/social_credit.php?action=logs&user_id=${userId}`);
+        const data = await res.json();
+        const logsList = overlay.querySelector('#creditHistoryLogsList');
+        
+        if (data.error) {
+            logsList.innerHTML = `<div style="text-align:center;padding:20px;color:var(--danger);">${data.error}</div>`;
+            return;
+        }
+
+        const logs = data.logs || [];
+        if (logs.length === 0) {
+            logsList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.88rem;">ไม่มีรายการเคลื่อนไหวเครดิตประวัติ</div>`;
+            return;
+        }
+
+        logsList.innerHTML = `
+            <div class="credit-timeline">
+                ${logs.map(log => {
+                    const amt = parseInt(log.change_amount);
+                    const isPositive = amt > 0;
+                    const changeClass = isPositive ? 'log-positive' : 'log-negative';
+                    const changeText = isPositive ? `+${amt}` : `${amt}`;
+                    
+                    // Format SQLite datetime (UTC to Local)
+                    let dateStr = log.created_at;
+                    try {
+                        const utcStr = log.created_at.replace(' ', 'T') + 'Z';
+                        const date = new Date(utcStr);
+                        dateStr = date.toLocaleString('th-TH', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+
+                    const updater = log.changed_by_name ? `ผู้บันทึก: ${log.changed_by_name}` : 'ระบบควบคุมอัตโนมัติ';
+                    const refCode = `TXN-${String(log.id).padStart(5, '0')}`;
+
+                    return `
+                        <div class="credit-timeline-item">
+                            <div class="credit-timeline-badge-wrapper">
+                                <div class="credit-timeline-badge ${changeClass}">${changeText}</div>
+                            </div>
+                            <div class="credit-timeline-content">
+                                <div class="credit-timeline-reason">${log.reason}</div>
+                                <div class="credit-timeline-meta">
+                                    <span>${dateStr}</span> &bull; 
+                                    <span style="font-weight:600;color:var(--text-primary);">${updater}</span>
+                                </div>
+                                <div class="credit-timeline-txn-id">${refCode}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+        const logsList = overlay.querySelector('#creditHistoryLogsList');
+        logsList.innerHTML = `<div style="text-align:center;padding:20px;color:var(--danger);">ไม่สามารถเรียกดูรายงานธุรกรรมได้</div>`;
+    }
+}
+
+// ==========================================
 // HELPERS
 // ==========================================
 function formatCurrency(val) {
     return parseFloat(val || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function bindCommaFormatting(input) {
+    if (!input) return;
+    
+    let selectAllOnFocus = true;
+    
+    input.addEventListener('focus', function() {
+        let val = input.value.replace(/,/g, '');
+        if (val === '0.00' || val === '0' || parseFloat(val) === 0 || val === '') {
+            input.value = '';
+        } else if (selectAllOnFocus) {
+            setTimeout(() => { input.select(); }, 50);
+        }
+    });
+    
+    input.addEventListener('mousedown', function() {
+        selectAllOnFocus = (document.activeElement !== input);
+    });
+    
+    input.addEventListener('input', function(e) {
+        let value = input.value;
+        let selectionStart = input.selectionStart;
+        let digitsBefore = (value.substring(0, selectionStart).replace(/,/g, '')).length;
+        
+        let cleanValue = value.replace(/[^0-9.]/g, '');
+        let dotIdx = cleanValue.indexOf('.');
+        if (dotIdx !== -1) {
+            let integerPart = cleanValue.substring(0, dotIdx);
+            let decimalPart = cleanValue.substring(dotIdx + 1).replace(/\./g, '').substring(0, 2);
+            cleanValue = integerPart + '.' + decimalPart;
+        }
+        
+        let parts = cleanValue.split('.');
+        let integerPart = parts[0];
+        
+        if (integerPart) {
+            if (integerPart.length > 1 && integerPart.startsWith('0')) {
+                integerPart = integerPart.replace(/^0+/, '');
+                if (integerPart === '') integerPart = '0';
+            }
+            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        } else if (cleanValue.startsWith('.')) {
+            integerPart = '0';
+        }
+        
+        let formattedValue = integerPart;
+        if (parts.length > 1) {
+            formattedValue += '.' + parts[1];
+        }
+        
+        input.value = formattedValue;
+        
+        let newSelectionStart = 0;
+        let formattedDigitsCount = 0;
+        while (newSelectionStart < formattedValue.length && formattedDigitsCount < digitsBefore) {
+            if (formattedValue[newSelectionStart] !== ',') {
+                formattedDigitsCount++;
+            }
+            newSelectionStart++;
+        }
+        
+        input.setSelectionRange(newSelectionStart, newSelectionStart);
+    });
+    
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace') {
+            let start = input.selectionStart;
+            let end = input.selectionEnd;
+            if (start === end && start > 0 && input.value[start - 1] === ',') {
+                e.preventDefault();
+                let val = input.value;
+                let newVal = val.substring(0, start - 2) + val.substring(start);
+                input.value = newVal;
+                input.setSelectionRange(start - 2, start - 2);
+                input.dispatchEvent(new Event('input'));
+            }
+        }
+    });
+    
+    input.addEventListener('blur', function() {
+        let value = input.value.replace(/,/g, '');
+        if (value === '' || isNaN(parseFloat(value))) {
+            input.value = '0.00';
+            return;
+        }
+        input.value = parseFloat(value).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    });
+}
+
+async function confirmSettlement(fromId, toId, amount) {
+    if (!await showConfirm("คุณได้รับเงินจำนวนนี้เรียบร้อยแล้วใช่หรือไม่? การยืนยันจะเคลียร์หนี้สินในระบบ")) return;
+    try {
+        const res = await fetch("api/expenses.php?action=settle", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ from_id: fromId, to_id: toId, amount: amount })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast("ยืนยันการเคลียร์เงินสำเร็จ", "success");
+            activeExpenseFilter = 'settlement';
+            const btnAll = document.getElementById("btnToggleAllExpenses");
+            const btnSettle = document.getElementById("btnToggleSettlements");
+            if (btnAll && btnSettle) {
+                btnSettle.classList.add("active");
+                btnAll.classList.remove("active");
+            }
+            loadExpenses();
+        } else {
+            showToast(data.error || "บันทึกการเคลียร์เงินล้มเหลว", "error");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error");
+    }
+}
+
 function formatShortDate(dateStr) {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
+    const d = parseLocalDate(dateStr);
+    if (!d || isNaN(d.getTime())) return dateStr;
     const months = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
     return `${d.getDate()} ${months[d.getMonth()]}`;
 }
@@ -1931,3 +2690,5 @@ window.deleteChecklistItem = deleteChecklistItem;
 window.updateInviteStatus = updateInviteStatus;
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
+window.adjustSocialCredit = adjustSocialCredit;
+window.showCreditHistoryModal = showCreditHistoryModal;

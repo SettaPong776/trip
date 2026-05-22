@@ -49,10 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if ($assigned_user_id !== null) {
-            $stmtCheck = $db->prepare("SELECT tm.user_id FROM trip_members tm WHERE tm.user_id = :uid AND tm.trip_id = :trip_id");
+            $stmtCheck = $db->prepare("SELECT tm.user_id FROM trip_members tm WHERE tm.user_id = :uid AND tm.trip_id = :trip_id AND tm.invite_status != 'declined'");
             $stmtCheck->execute(['uid' => $assigned_user_id, 'trip_id' => $trip_id]);
             if (!$stmtCheck->fetch()) {
-                sendResponse(['error' => 'ไม่พบสมาชิกที่เลือกในทริปนี้'], 400);
+                sendResponse(['error' => 'ไม่พบสมาชิกที่เลือกหรือสมาชิกปฏิเสธคำเชิญในทริปนี้'], 400);
             }
         }
         

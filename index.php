@@ -61,6 +61,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <span>ปฏิทินวันหยุด</span>
                 </button>
+                <button type="button" class="sidebar-nav-item global-nav-tab-btn" data-tab="credit-tab" id="global-credit-tab-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg>
+                    <span>Social Credit</span>
+                </button>
                 <button type="button" class="sidebar-nav-item global-nav-tab-btn" data-tab="members-tab" id="global-members-tab-btn" style="display: none;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <span>จัดการสมาชิก</span>
@@ -196,6 +200,11 @@
                             <div id="globalUserManagementContainer"></div>
                         </div>
                     </div>
+
+                    <!-- D. Social Credit Tab Content -->
+                    <div id="socialCreditTabContent" class="global-tab-content" style="display: none;">
+                        <div id="socialCreditContainer"></div>
+                    </div>
                 </section>
                 
                 <!-- ==========================================
@@ -291,10 +300,20 @@
                     <div id="expensesTab" class="tab-content">
                         <div class="expense-layout">
                             <div class="glass-panel expense-card">
-                                <div class="section-header" style="margin-bottom: 16px;">
+                                <div class="section-header" style="margin-bottom: 12px;">
                                     <h2 class="section-title">รายการใช้จ่าย</h2>
                                     <button type="button" id="showAddExpenseModal" class="btn btn-primary btn-sm">+ เพิ่มค่าใช้จ่าย</button>
                                 </div>
+                                
+                                <div class="segmented-control">
+                                    <button type="button" class="segmented-control-option active" id="btnToggleAllExpenses">
+                                        ค่าใช้จ่ายทริป
+                                    </button>
+                                    <button type="button" class="segmented-control-option" id="btnToggleSettlements">
+                                        รายการเคลียร์เงิน
+                                    </button>
+                                </div>
+                                
                                 <div id="expensesListContainer"></div>
                             </div>
                             
@@ -385,14 +404,25 @@
                     </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1.5fr 0.5fr; gap: 10px;">
-                    <div class="form-group">
-                        <label class="form-label" for="tripBudget">งบประมาณรวม (บาท)</label>
-                        <input type="number" id="tripBudget" class="form-input" placeholder="0" value="0">
+                <!-- Premium Budget Card -->
+                <div class="premium-budget-card">
+                    <div class="premium-budget-header">
+                        <svg class="premium-budget-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 2c5.523 0 10 1.79 10 4s-4.477 4-10 4S2 8.21 2 6s4.477-4 10-4z"/>
+                          <path d="M22 6v6c0 2.21-4.477 4-10 4S2 14.21 2 12V6"/>
+                          <path d="M22 12v6c0 2.21-4.477 4-10 4S2 20.21 2 18v-6"/>
+                        </svg>
+                        <span>งบประมาณที่ได้รับจัดสรร (บาท)</span>
                     </div>
+                    <div class="premium-budget-input-wrapper">
+                        <input type="text" id="tripBudget" class="premium-budget-input" inputmode="decimal" placeholder="0.00" value="0.00">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                     <div class="form-group">
-                        <label class="form-label" for="tripEmoji">ไอคอน</label>
-                        <input type="text" id="tripEmoji" class="form-input" value="✈️" style="text-align: center; font-size: 1.3rem;">
+                        <label class="form-label" for="tripEmoji">ไอคอนโครงการ</label>
+                        <input type="text" id="tripEmoji" class="form-input" value="✈️" style="width: 80px; text-align: center; font-size: 1.3rem;">
                     </div>
                 </div>
                 
@@ -404,8 +434,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" id="closeCreateTripModal" class="btn btn-secondary">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary">สร้างทริป</button>
+                    <button type="button" id="closeCreateTripModal" class="btn btn-secondary">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -433,14 +463,25 @@
                     </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1.5fr 0.5fr; gap: 10px;">
-                    <div class="form-group">
-                        <label class="form-label" for="editTripBudget">งบประมาณรวม (บาท)</label>
-                        <input type="number" id="editTripBudget" class="form-input" placeholder="0" value="0">
+                <!-- Premium Budget Card -->
+                <div class="premium-budget-card">
+                    <div class="premium-budget-header">
+                        <svg class="premium-budget-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 2c5.523 0 10 1.79 10 4s-4.477 4-10 4S2 8.21 2 6s4.477-4 10-4z"/>
+                          <path d="M22 6v6c0 2.21-4.477 4-10 4S2 14.21 2 12V6"/>
+                          <path d="M22 12v6c0 2.21-4.477 4-10 4S2 20.21 2 18v-6"/>
+                        </svg>
+                        <span>งบประมาณที่ได้รับจัดสรร (บาท)</span>
                     </div>
+                    <div class="premium-budget-input-wrapper">
+                        <input type="text" id="editTripBudget" class="premium-budget-input" inputmode="decimal" placeholder="0.00" value="0.00">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                     <div class="form-group">
-                        <label class="form-label" for="editTripEmoji">ไอคอน</label>
-                        <input type="text" id="editTripEmoji" class="form-input" value="✈️" style="text-align: center; font-size: 1.3rem;">
+                        <label class="form-label" for="editTripEmoji">ไอคอนโครงการ</label>
+                        <input type="text" id="editTripEmoji" class="form-input" value="✈️" style="width: 80px; text-align: center; font-size: 1.3rem;">
                     </div>
                 </div>
                 
@@ -452,8 +493,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" id="closeEditTripModal" class="btn btn-secondary">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                    <button type="button" id="closeEditTripModal" class="btn btn-secondary">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -472,7 +513,7 @@
                 <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px;">
                     <div class="form-group">
                         <label class="form-label" for="expenseAmount">จำนวนเงิน (฿) *</label>
-                        <input type="number" step="0.01" id="expenseAmount" class="form-input" placeholder="0.00" required>
+                        <input type="text" id="expenseAmount" class="form-input" inputmode="decimal" placeholder="0.00" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="expenseCategory">หมวดหมู่</label>
@@ -511,8 +552,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" id="closeAddExpenseModal" class="btn btn-secondary">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary">บันทึก</button>
+                    <button type="button" id="closeAddExpenseModal" class="btn btn-secondary">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -550,8 +591,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" id="closeAddItineraryModal" class="btn btn-secondary">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary">บันทึก</button>
+                    <button type="button" id="closeAddItineraryModal" class="btn btn-secondary">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -585,8 +626,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" id="closeAddChecklistModal" class="btn btn-secondary">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary">เพิ่ม</button>
+                    <button type="button" id="closeAddChecklistModal" class="btn btn-secondary">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -614,8 +655,8 @@
                     </select>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" id="closeGlobalUserModal" class="btn btn-secondary">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary" id="globalUserSubmitBtn">บันทึก</button>
+                    <button type="button" id="closeGlobalUserModal" class="btn btn-secondary">ยกเลิก</button>
                 </div>
             </form>
         </div>

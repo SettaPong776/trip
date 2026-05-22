@@ -120,6 +120,25 @@ function initializeDatabase($pdo) {
         FOREIGN KEY(assigned_user_id) REFERENCES users(id) ON DELETE SET NULL
     );");
 
+    // 8. Migration: Add social_credit column to users if it doesn't exist
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN social_credit INTEGER DEFAULT 50;");
+    } catch (PDOException $e) {
+        // Column already exists
+    }
+
+    // 9. Social Credit Logs table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS social_credit_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        change_amount INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        changed_by INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY(changed_by) REFERENCES users(id) ON DELETE SET NULL
+    );");
+
     // Seed super admin user (passcode: 000000)
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE passcode = '000000'");
     $stmt->execute();

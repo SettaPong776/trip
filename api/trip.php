@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'list') {
         // Admins see all trips
         $stmt = $db->prepare("
             SELECT t.*, 'admin' AS role, 'accepted' AS invite_status,
-                (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id) as member_count
+                (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id AND invite_status = 'accepted') as member_count
             FROM trips t
             ORDER BY t.start_date DESC
         ");
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'list') {
         // Members see only trips they belong to
         $stmt = $db->prepare("
             SELECT t.*, 'member' AS role, tm.invite_status,
-                (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id) as member_count
+                (SELECT COUNT(*) FROM trip_members WHERE trip_id = t.id AND invite_status = 'accepted') as member_count
             FROM trip_members tm
             JOIN trips t ON tm.trip_id = t.id
             WHERE tm.user_id = :user_id
@@ -273,14 +273,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             sendResponse(['error' => 'คุณสามารถเปลี่ยนสถานะได้เฉพาะตัวเองเท่านั้น'], 403);
         }
         
-        $stmt = $db->prepare("UPDATE trip_members SET invite_status = :status WHERE trip_id = :trip_id AND user_id = :user_id");
-        $stmt->execute([
-            'status' => $status,
-            'trip_id' => $ctx['trip_id'],
-            'user_id' => $user_id
-        ]);
+        // Get current invite status before updating
+        $stmtCurrent = $db->prepare("SELECT invite_status FROM trip_members WHERE trip_id = :trip_id AND user_id = :user_id");
+        $stmtCurrent->execute(['trip_id' => $ctx['trip_id'], 'user_id' => $user_id]);
+        $currentStatus = $stmtCurrent->fetchColumn();
         
-        sendResponse(['success' => true, 'message' => 'อัปเดตสถานะคำเชิญสำเร็จ']);
+        try {
+            $db->beginTransaction();
+            
+            // Update invite status
+            $stmt = $db->prepare("UPDATE trip_members SET invite_status = :status WHERE trip_id = :trip_id AND user_id = :user_id");
+            $stmt->execute([
+                'status' => $status,
+                'trip_id' => $ctx['trip_id'],
+                'user_id' => $user_id
+            ]);
+            
+            // Auto Social Credit adjustments
+            $creditChange = 0;
+            $creditReason = '';
+            
+            // Accepting from non-accepted → +10
+            if ($status === 'accepted' && $currentStatus !== 'accepted') {
+                $creditChange = 10;
+                $creditReason = 'ตอบรับเข้าร่วมทริป (อัตโนมัติ)';
+            }
+            // Declining from accepted → -10 (เททริป/บิด)
+            else if ($status === 'declined' && $currentStatus === 'accepted') {
+                $creditChange = -10;
+                $creditReason = 'เททริป/บิด — ปฏิเสธหลังจากตอบรับแล้ว (อัตโนมัติ)';
+            }
+            
+            if ($creditChange !== 0) {
+                // Get current credit
+                $stmtCredit = $db->prepare("SELECT social_credit FROM users WHERE id = :id");
+                $stmtCredit->execute(['id' => $user_id]);
+                $currentCredit = intval($stmtCredit->fetchColumn());
+                
+                // Clamp to 0-100
+                $newCredit = max(0, min(100, $currentCredit + $creditChange));
+                
+                // Update credit
+                $stmtUpdate = $db->prepare("UPDATE users SET social_credit = :credit WHERE id = :id");
+                $stmtUpdate->execute(['credit' => $newCredit, 'id' => $user_id]);
+                
+                // Log the change
+                $stmtLog = $db->prepare("INSERT INTO social_credit_logs (user_id, change_amount, reason, changed_by) VALUES (:user_id, :change_amount, :reason, :changed_by)");
+                $stmtLog->execute([
+                    'user_id' => $user_id,
+                    'change_amount' => $creditChange,
+                    'reason' => $creditReason,
+                    'changed_by' => $ctx['user_id']
+                ]);
+            }
+            
+            $db->commit();
+            
+            sendResponse([
+                'success' => true,
+                'message' => 'อัปเดตสถานะคำเชิญสำเร็จ',
+                'credit_change' => $creditChange,
+                'previous_status' => $currentStatus
+            ]);
+        } catch (Exception $e) {
+            $db->rollBack();
+            sendResponse(['error' => 'อัปเดตสถานะล้มเหลว: ' . $e->getMessage()], 500);
+        }
     }
 }
 
