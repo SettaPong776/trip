@@ -1,6 +1,28 @@
 // assets/js/app.js
 
 // ==========================================
+// SVG ICONS & CONSTANTS
+// ==========================================
+const iconEditSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
+const iconDeleteSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+const iconCopySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+const iconMapSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+
+// Category Icons (Expenses)
+const svgFood = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Z"/><path d="M21 17v5"/></svg>`;
+const svgTravel = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg>`;
+const svgHotel = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16M2 8h20v8H2M22 8v12M6 12h4"></path></svg>`;
+const svgShopping = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
+const svgGeneral = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`;
+
+// Checklist Icons
+const svgChecklistDocuments = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`;
+const svgChecklistClothes = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 7.83V20a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V7.83L3.62 3.46a2 2 0 0 1 1.64-3.46h13.5a2 2 0 0 1 1.62 3.46z"></path></svg>`;
+const svgChecklistGadget = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+const svgChecklistFood = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Z"/></svg>`;
+const svgChecklistGeneral = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M9 10V6a3 3 0 0 1 6 0v4"></path></svg>`;
+
+// ==========================================
 // GLOBAL STATE
 // ==========================================
 let currentUser = null;
@@ -254,8 +276,13 @@ function showToast(message, type = 'info') {
     }
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+    const icons = {
+        success: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        error: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        warning: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+        info: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+    };
+    toast.innerHTML = `<span class="toast-icon-wrapper" style="display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${icons[type] || icons.info}</span><span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => {
         toast.classList.add('fade-out');
@@ -268,7 +295,9 @@ function showConfirm(message) {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay active';
         overlay.innerHTML = `<div class="modal-card glass-panel" style="max-width:400px;text-align:center;padding:32px 24px;">
-            <div style="font-size:3rem;margin-bottom:14px;">❓</div>
+            <div style="margin-bottom:18px;display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(0,113,227,0.08);color:var(--apple-blue);margin-left:auto;margin-right:auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
             <h3 class="section-title" style="margin-bottom:10px;font-size:1.2rem;">ยืนยันการทำรายการ</h3>
             <p style="color:var(--text-muted);margin-bottom:24px;font-size:0.9rem;line-height:1.5;">${message}</p>
             <div class="modal-actions" style="justify-content:center;gap:12px;margin-top:0;">
@@ -288,7 +317,9 @@ function showAlert(message) {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay active';
         overlay.innerHTML = `<div class="modal-card glass-panel" style="max-width:400px;text-align:center;padding:32px 24px;">
-            <div style="font-size:3rem;margin-bottom:14px;">🔔</div>
+            <div style="margin-bottom:18px;display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(255,149,0,0.08);color:var(--apple-orange);margin-left:auto;margin-right:auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </div>
             <h3 class="section-title" style="margin-bottom:10px;font-size:1.2rem;">แจ้งเตือน</h3>
             <p style="color:var(--text-muted);margin-bottom:24px;font-size:0.9rem;line-height:1.5;">${message}</p>
             <div class="modal-actions" style="justify-content:center;margin-top:0;">
@@ -363,7 +394,9 @@ function renderTripSelector() {
     if (currentTrips.length === 0) {
         gridContainer.innerHTML = `
             <div class="empty-state" style="grid-column: 1/-1;">
-                <div class="empty-state-icon">✈️</div>
+                <div class="empty-state-icon" style="margin-bottom:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--apple-gray-4);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                </div>
                 <div class="empty-state-text">ยังไม่มีโครงการท่องเที่ยว</div>
                 ${currentUser.role === 'admin' ? '<p style="color:var(--text-muted);margin-bottom:20px;">เริ่มสร้างโครงการแรกของคุณโดยคลิกปุ่มด้านบน</p>' : '<p style="color:var(--text-muted);">รอผู้ดูแลระบบสร้างโครงการและเชิญคุณเข้าร่วม</p>'}
             </div>`;
@@ -397,30 +430,36 @@ function renderTripSelector() {
         
         if (today < start) {
             const diff = Math.ceil((start - today) / (1000*60*60*24));
-            countdownText = `อีก ${diff} วัน ✈️`;
+            countdownText = `อีก ${diff} วัน`;
         } else if (today >= start && today <= end) {
-            countdownText = `กำลังท่องเที่ยวอยู่ 🚗💨`;
+            countdownText = `กำลังเดินทาง`;
         }
         
         let actionButtonsHtml = '';
         if (currentUser.role === 'admin') {
             actionButtonsHtml = `
                 <div class="trip-card-actions" style="top: 20px; right: 20px;">
-                    <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="font-size:0.9rem;">✏️</button>
-                    <button type="button" class="btn-icon card-delete-btn" title="ลบ" style="color:var(--danger);font-size:0.9rem;">🗑️</button>
+                    <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconEditSvg}</button>
+                    <button type="button" class="btn-icon card-delete-btn" title="ลบ" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
                 </div>
             `;
         }
         
         bannerContainer.innerHTML = `
             <div class="upcoming-banner" onclick="selectTrip(${upcoming.id})">
-                <div class="upcoming-label">⭐ ทริปถัดไป</div>
+                <div class="upcoming-label">ทริปถัดไป</div>
                 <div class="upcoming-emoji">${upcoming.cover_emoji || '✈️'}</div>
                 <div class="upcoming-title">${upcoming.title}</div>
                 <div class="upcoming-dates">${ThaiHolidays.formatThaiDate(upcoming.start_date)} — ${ThaiHolidays.formatThaiDate(upcoming.end_date)}</div>
                 <div class="upcoming-meta">
-                    <div class="upcoming-meta-item">👥 <strong>${upcoming.member_count || 0}</strong> คน</div>
-                    <div class="upcoming-meta-item">💰 <strong>${formatCurrency(upcoming.total_budget)}</strong> ฿</div>
+                    <div class="upcoming-meta-item" style="display:inline-flex;align-items:center;gap:4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.6);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <strong>${upcoming.member_count || 0}</strong> คน
+                    </div>
+                    <div class="upcoming-meta-item" style="display:inline-flex;align-items:center;gap:4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.6);"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="12"></line><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                        <strong>${formatCurrency(upcoming.total_budget)}</strong> ฿
+                    </div>
                 </div>
                 ${countdownText ? `<div class="countdown-badge">${countdownText}</div>` : ''}
                 ${actionButtonsHtml}
@@ -453,8 +492,8 @@ function renderTripSelector() {
         if (currentUser.role === 'admin') {
             actionButtonsHtml = `
                 <div class="trip-card-actions">
-                    <button type="button" class="btn-icon card-edit-btn" title="แก้ไข">✏️</button>
-                    <button type="button" class="btn-icon card-delete-btn" title="ลบ" style="color:var(--danger);">🗑️</button>
+                    <button type="button" class="btn-icon card-edit-btn" title="แก้ไข" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconEditSvg}</button>
+                    <button type="button" class="btn-icon card-delete-btn" title="ลบ" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
                 </div>
             `;
         }
@@ -467,7 +506,10 @@ function renderTripSelector() {
             <div class="trip-card-title">${t.title}</div>
             <div class="trip-card-dates">${ThaiHolidays.formatThaiDate(t.start_date)} — ${ThaiHolidays.formatThaiDate(t.end_date)}</div>
             <div class="trip-card-footer">
-                <div class="trip-card-members">👥 ${t.member_count || 0} คน</div>
+                <div class="trip-card-members" style="display:inline-flex;align-items:center;gap:4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--apple-gray-4);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>${t.member_count || 0} คน</span>
+                </div>
                 <span class="trip-status-pill ${statusClass}">${statusText}</span>
             </div>
             ${actionButtonsHtml}`;
@@ -639,11 +681,11 @@ function renderDashboard() {
     const countdownEl = document.getElementById("tripCountdownText");
     if (today < start) {
         const diff = Math.ceil(Math.abs(start - today) / (1000*60*60*24));
-        countdownEl.textContent = `อีก ${diff} วันจะออกเดินทาง ✈️`;
+        countdownEl.textContent = `อีก ${diff} วันจะออกเดินทาง`;
     } else if (today >= start && today <= end) {
-        countdownEl.textContent = `กำลังท่องเที่ยวอยู่ 🚗💨`;
+        countdownEl.textContent = `กำลังเดินทาง`;
     } else {
-        countdownEl.textContent = `ทริปนี้เสร็จสิ้นแล้ว 🌟`;
+        countdownEl.textContent = `ทริปนี้เสร็จสิ้นแล้ว`;
     }
     
     document.getElementById("statTotalBudget").textContent = `${formatCurrency(tripDetails.total_budget)} ฿`;
@@ -683,7 +725,7 @@ function renderDashboard() {
         if (myTripRole === 'admin' || isSelf) {
             passcodeHtml = `<div class="passcode-container">
                 <span class="passcode-text">${m.passcode}</span>
-                <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('${m.passcode}');showToast('คัดลอกแล้ว','success');">📋</button>
+                <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('${m.passcode}');showToast('คัดลอกแล้ว','success');" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconCopySvg}</button>
             </div>`;
         }
         
@@ -780,7 +822,12 @@ function renderGlobalUsers() {
     container.innerHTML = "";
     
     if (globalUsers.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">ยังไม่มีสมาชิกในระบบ</div></div>`;
+        container.innerHTML = `<div class="empty-state">
+            <div class="empty-state-icon" style="margin-bottom:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--apple-gray-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="empty-state-text">ยังไม่มีสมาชิกในระบบ</div>
+        </div>`;
         return;
     }
     
@@ -796,9 +843,9 @@ function renderGlobalUsers() {
             <div style="display:flex;gap:8px;align-items:center;">
                 <div class="passcode-container" style="display:inline-flex;align-items:center;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);padding:4px 8px;gap:6px;">
                     <span class="passcode-text" style="font-family:monospace;font-weight:bold;letter-spacing:1px;color:var(--primary);">${u.passcode}</span>
-                    <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('${u.passcode}');showToast('คัดลอกรหัสผ่านแล้ว','success');" title="คัดลอกรหัสผ่าน" style="background:transparent;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;padding:0;">📋</button>
+                    <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('${u.passcode}');showToast('คัดลอกรหัสผ่านแล้ว','success');" title="คัดลอกรหัสผ่าน" style="background:transparent;border:none;cursor:pointer;color:var(--text-muted);display:inline-flex;align-items:center;justify-content:center;padding:0;">${iconCopySvg}</button>
                 </div>
-                <button type="button" class="btn btn-secondary btn-xs" onclick="openEditGlobalUserModal(${u.id}, '${u.name}', '${u.passcode}', '${u.role}')">✏️ แก้ไข</button>
+                <button type="button" class="btn btn-secondary btn-xs" onclick="openEditGlobalUserModal(${u.id}, '${u.name}', '${u.passcode}', '${u.role}')" style="display:inline-flex;align-items:center;gap:4px;">${iconEditSvg} <span>แก้ไข</span></button>
                 ${!isSelf && !isSuper ? `<button type="button" class="btn btn-xs" style="background:var(--danger);color:white;" onclick="deleteGlobalUser(${u.id},'${u.name}')">ลบ</button>` : ''}
             </div>`;
             
@@ -817,7 +864,7 @@ function renderGlobalUsers() {
 
 function openAddGlobalUserModal() {
     document.getElementById("globalUserId").value = "";
-    document.getElementById("globalUserModalTitle").textContent = "👥 เพิ่มผู้ใช้งานใหม่";
+    document.getElementById("globalUserModalTitle").textContent = "เพิ่มผู้ใช้งานใหม่";
     document.getElementById("globalUserName").value = "";
     document.getElementById("globalUserPasscode").value = "";
     document.getElementById("globalUserRole").value = "member";
@@ -826,7 +873,7 @@ function openAddGlobalUserModal() {
 
 function openEditGlobalUserModal(id, name, passcode, role) {
     document.getElementById("globalUserId").value = id;
-    document.getElementById("globalUserModalTitle").textContent = "👥 แก้ไขผู้ใช้งาน";
+    document.getElementById("globalUserModalTitle").textContent = "แก้ไขผู้ใช้งาน";
     document.getElementById("globalUserName").value = name;
     document.getElementById("globalUserPasscode").value = passcode;
     document.getElementById("globalUserRole").value = role;
@@ -1054,9 +1101,9 @@ function renderKanbanBoard() {
     container.innerHTML = "";
     
     const columns = [
-        { key: 'accepted', label: 'ตกลงเข้าร่วม', icon: '✅', dotClass: 'status-dot-accepted' },
-        { key: 'pending', label: 'อยู่ระหว่างการเชิญ', icon: '⏳', dotClass: 'status-dot-pending' },
-        { key: 'declined', label: 'ปฏิเสธคำเชิญ', icon: '❌', dotClass: 'status-dot-declined' }
+        { key: 'accepted', label: 'ตกลงเข้าร่วม', dotClass: 'status-dot-accepted' },
+        { key: 'pending', label: 'อยู่ระหว่างการเชิญ', dotClass: 'status-dot-pending' },
+        { key: 'declined', label: 'ปฏิเสธคำเชิญ', dotClass: 'status-dot-declined' }
     ];
     
     columns.forEach(col => {
@@ -1065,7 +1112,7 @@ function renderKanbanBoard() {
         column.className = "kanban-column";
         column.innerHTML = `
             <div class="kanban-header">
-                <span class="kanban-header-icon">${col.icon}</span>
+                <span class="status-dot ${col.dotClass}" style="width:10px;height:10px;margin-right:2px;box-shadow:none;"></span>
                 <span class="kanban-header-title">${col.label}</span>
                 <span class="kanban-count">${members.length}</span>
             </div>`;
@@ -1083,7 +1130,7 @@ function renderKanbanBoard() {
             if (isSelf || myTripRole === 'admin') {
                 const targetId = m.id;
                 const options = ['accepted', 'pending', 'declined'].filter(s => s !== col.key);
-                const btnLabels = { accepted: '✅ ตกลง', pending: '⏳ รอ', declined: '❌ ปฏิเสธ' };
+                const btnLabels = { accepted: 'ตกลง', pending: 'รอ', declined: 'ปฏิเสธ' };
                 btnHtml = `<div style="display:flex;gap:4px;margin-left:auto;">`;
                 options.forEach(opt => {
                     btnHtml += `<button class="btn btn-xs btn-secondary" onclick="updateInviteStatus(${targetId},'${opt}')">${btnLabels[opt]}</button>`;
@@ -1161,23 +1208,28 @@ function renderExpensesList(expenses) {
     container.innerHTML = "";
     
     if (expenses.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💸</div><div class="empty-state-text">ยังไม่มีค่าใช้จ่าย</div></div>`;
+        container.innerHTML = `<div class="empty-state">
+            <div class="empty-state-icon" style="margin-bottom:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--apple-gray-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="12"></line><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            </div>
+            <div class="empty-state-text">ยังไม่มีค่าใช้จ่าย</div>
+        </div>`;
         return;
     }
     
-    const catIcons = { food:"🍔", travel:"⛽", hotel:"🏨", shopping:"🛍️", general:"💵" };
+    const catIcons = { food: svgFood, travel: svgTravel, hotel: svgHotel, shopping: svgShopping, general: svgGeneral };
     const catNames = { food:"ค่าอาหาร", travel:"ค่าเดินทาง", hotel:"ค่าที่พัก", shopping:"ช้อปปิ้ง", general:"ทั่วไป" };
     
     expenses.forEach(e => {
         const splitsNames = e.splits.map(s => s.user_name).join(", ");
         const canDelete = myTripRole === 'admin' || e.payer_id == currentUser.id;
-        const deleteBtn = canDelete ? `<button class="btn-icon" onclick="deleteExpense(${e.id})" style="color:var(--danger);" title="ลบ">✕</button>` : "";
+        const deleteBtn = canDelete ? `<button class="btn-icon" onclick="deleteExpense(${e.id})" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;" title="ลบ">${iconDeleteSvg}</button>` : "";
         
         const card = document.createElement("div");
         card.className = "expense-item";
         card.innerHTML = `
             <div class="expense-left">
-                <div class="expense-icon-box cat-${e.category}">${catIcons[e.category] || "💵"}</div>
+                <div class="expense-icon-box cat-${e.category}" style="display:inline-flex;align-items:center;justify-content:center;">${catIcons[e.category] || svgGeneral}</div>
                 <div class="expense-title-desc">
                     <span class="title">${e.description}</span>
                     <span class="meta">จ่ายโดย <b>${e.payer_name}</b> | หาร: ${splitsNames}</span>
@@ -1213,7 +1265,7 @@ function renderBalancesAndSettlements(balances, settlements) {
     const sc = document.getElementById("optimizedSettlementsContainer");
     sc.innerHTML = "";
     if (settlements.length === 0) {
-        sc.innerHTML = `<div style="text-align:center;color:var(--success);font-weight:600;padding:20px;">🎉 ไม่มีใครติดค้างกัน</div>`;
+        sc.innerHTML = `<div style="text-align:center;color:var(--success);font-weight:600;padding:20px;">ไม่มีใครติดค้างกัน</div>`;
         return;
     }
     
@@ -1228,7 +1280,7 @@ function renderBalancesAndSettlements(balances, settlements) {
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <span class="settle-amount">${formatCurrency(s.amount)} ฿</span>
-                <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('โอนเงินค่าทริปให้ ${s.to_name} จำนวน ${formatCurrency(s.amount)} บาท');showToast('คัดลอกแล้ว','success');">📋</button>
+                <button type="button" class="btn-icon" onclick="navigator.clipboard.writeText('โอนเงินค่าทริปให้ ${s.to_name} จำนวน ${formatCurrency(s.amount)} บาท');showToast('คัดลอกแล้ว','success');" style="display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconCopySvg}</button>
             </div>`;
         sc.appendChild(row);
     });
@@ -1355,7 +1407,7 @@ function renderDayFilters() {
         const btn = document.createElement("button");
         btn.className = `day-filter-btn ${currentItineraryFilterDay === d ? 'active' : ''}`;
         const holiday = ThaiHolidays.getHoliday(d);
-        btn.innerHTML = `วัน ${idx + 1} (${formatShortDate(d)})${holiday ? ' 🔴' : ''}`;
+        btn.innerHTML = `วัน ${idx + 1} (${formatShortDate(d)})${holiday ? ' <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--apple-red);vertical-align:middle;margin-left:2px;"></span>' : ''}`;
         btn.onclick = () => { currentItineraryFilterDay = d; loadItinerary(); };
         container.appendChild(btn);
     });
@@ -1368,7 +1420,12 @@ function renderItineraryTimeline(itineraries) {
     const filtered = currentItineraryFilterDay === "all" ? itineraries : itineraries.filter(i => i.visit_date === currentItineraryFilterDay);
     
     if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📍</div><div class="empty-state-text">ยังไม่มีกำหนดการ</div></div>`;
+        container.innerHTML = `<div class="empty-state">
+            <div class="empty-state-icon" style="margin-bottom:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--apple-gray-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </div>
+            <div class="empty-state-text">ยังไม่มีกำหนดการ</div>
+        </div>`;
         return;
     }
     
@@ -1377,8 +1434,8 @@ function renderItineraryTimeline(itineraries) {
     container.appendChild(line);
     
     filtered.forEach(item => {
-        const deleteBtn = myTripRole === 'admin' ? `<button class="btn-icon" onclick="deleteItinerary(${item.id})" style="color:var(--danger);">✕</button>` : "";
-        const mapLink = item.location_url ? `<a href="${item.location_url}" target="_blank" class="location-link">📍 Google Maps</a>` : "";
+        const deleteBtn = myTripRole === 'admin' ? `<button class="btn-icon" onclick="deleteItinerary(${item.id})" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>` : "";
+        const mapLink = item.location_url ? `<a href="${item.location_url}" target="_blank" class="location-link" style="display:inline-flex;align-items:center;gap:4px;">${iconMapSvg} <span>Google Maps</span></a>` : "";
         const holidayName = ThaiHolidays.getHoliday(item.visit_date);
         const holidayBadge = holidayName ? `<div class="holiday-item-row" style="margin-top:8px;width:fit-content;display:inline-flex;"><span class="date">วันหยุด</span> <span>${holidayName}</span></div>` : "";
         
@@ -1527,27 +1584,45 @@ function renderChecklist(items) {
     container.innerHTML = "";
     
     if (items.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎒</div><div class="empty-state-text">ไม่มีรายการ</div></div>`;
+        container.innerHTML = `<div class="empty-state">
+            <div class="empty-state-icon" style="margin-bottom:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--apple-gray-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            </div>
+            <div class="empty-state-text">ไม่มีรายการสัมภาระ</div>
+        </div>`;
         return;
     }
     
-    const catIcons = { documents:"📄", clothes:"👕", gadget:"🔌", food:"🥫", general:"🎒" };
+    const catIcons = {
+        documents: svgChecklistDocuments,
+        clothes: svgChecklistClothes,
+        gadget: svgChecklistGadget,
+        food: svgChecklistFood,
+        general: svgChecklistGeneral
+    };
     const catNames = { documents:"เอกสาร", clothes:"เสื้อผ้า", gadget:"ไอที", food:"ของกิน", general:"ทั่วไป" };
     
     items.forEach(item => {
         const row = document.createElement("div");
         row.className = `checklist-item-row ${item.is_completed ? 'completed' : ''}`;
-        const assignPill = item.assigned_user_name ? `<span class="item-assigned-pill">🙋 ${item.assigned_user_name}</span>` : "";
+        const assignPill = item.assigned_user_name ? `<span class="item-assigned-pill" style="display:inline-flex;align-items:center;gap:4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>${item.assigned_user_name}</span>
+        </span>` : "";
         
         row.innerHTML = `
             <label class="checkbox-label">
                 <input type="checkbox" onchange="toggleChecklistItem(${item.id},this.checked)" ${item.is_completed ? 'checked' : ''}>
                 <span class="checkbox-custom"></span>
-                <span class="item-name-text">${catIcons[item.category] || "🎒"} ${item.item_name}${assignPill}</span>
+                <span class="item-name-text" style="display:inline-flex;align-items:center;gap:6px;">
+                    <span style="display:inline-flex;color:var(--apple-gray-3);">${catIcons[item.category] || svgChecklistGeneral}</span>
+                    <span>${item.item_name}</span>
+                    ${assignPill}
+                </span>
             </label>
             <div style="display:flex;align-items:center;gap:6px;">
                 <span style="font-size:0.7rem;color:var(--text-muted);background:var(--surface-2);padding:2px 8px;border-radius:99px;">${catNames[item.category] || "ทั่วไป"}</span>
-                <button type="button" class="btn-icon" onclick="deleteChecklistItem(${item.id})" style="color:var(--danger);">✕</button>
+                <button type="button" class="btn-icon" onclick="deleteChecklistItem(${item.id})" style="color:var(--danger);display:inline-flex;align-items:center;justify-content:center;padding:6px;">${iconDeleteSvg}</button>
             </div>`;
         container.appendChild(row);
     });
@@ -1711,7 +1786,11 @@ function renderLeaveSuggestions() {
         const card = document.createElement("div");
         card.className = "suggestion-card";
         card.innerHTML = `
-            <div style="font-weight:700;font-size:0.88rem;margin-bottom:4px;">💡 ${s.holidayName} <span style="color:var(--warning);">(${s.holidayDay})</span></div>
+            <div style="font-weight:700;font-size:0.88rem;margin-bottom:4px;display:inline-flex;align-items:center;gap:4px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--apple-orange);"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5.5 5.5 0 0 0 12 3a5.5 5.5 0 0 0-6 5.5c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
+                <span>${s.holidayName}</span>
+                <span style="color:var(--warning);font-weight:500;">(${s.holidayDay})</span>
+            </div>
             <div style="color:var(--text-muted);margin-bottom:4px;">แนะนำลา: <b style="color:var(--accent-cyan);">${s.suggestedLeaveDate} (${s.suggestedLeaveDay})</b></div>
             <div style="font-size:0.8rem;color:var(--success);font-weight:500;">${s.reason}</div>`;
         container.appendChild(card);

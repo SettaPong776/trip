@@ -45,7 +45,9 @@
         <!-- Sidebar Navigation (Apple Finder-style) -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-brand" id="backToTripsBtn">
-                <div class="brand-icon">✈️</div>
+                <div class="brand-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                </div>
                 <span>TRIPMATE</span>
             </div>
             
@@ -122,7 +124,7 @@
                 
                 <div class="topbar-right" id="topbarActions">
                     <!-- Contextual buttons will toggle visibility dynamically based on active tab -->
-                    <button type="button" id="showCreateTripModalBtn" class="btn btn-primary btn-sm">✈️ สร้างทริปใหม่</button>
+                    <button type="button" id="showCreateTripModalBtn" class="btn btn-primary btn-sm">สร้างทริปใหม่</button>
                     <button type="button" id="showAddGlobalUserModalBtn" class="btn btn-primary btn-sm" style="display: none;">+ เพิ่มสมาชิก</button>
                 </div>
             </header>
@@ -177,7 +179,7 @@
                             
                             <div>
                                 <div class="glass-panel leave-suggestions-panel">
-                                    <h2 class="section-title" style="color: var(--accent-cyan); margin-bottom: 6px;">💡 แนะนำวันลาพักร้อน</h2>
+                                    <h2 class="section-title" style="color: var(--accent-cyan); margin-bottom: 6px;">แนะนำวันลาพักร้อน</h2>
                                     <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;">คำนวณวันลาเพิ่มเชื่อมวันหยุดยาว</p>
                                     <div id="smartLeaveSuggestionsList"></div>
                                 </div>
@@ -189,7 +191,7 @@
                     <div id="globalMembersTabContent" class="global-tab-content" style="display: none;">
                         <div class="glass-panel" style="padding: 24px;">
                             <div class="section-header" style="margin-bottom: 20px;">
-                                <h2 class="section-title">👥 จัดการสมาชิกในระบบ</h2>
+                                <h2 class="section-title">จัดการสมาชิกในระบบ</h2>
                             </div>
                             <div id="globalUserManagementContainer"></div>
                         </div>
@@ -217,17 +219,23 @@
                                         <div class="stat-card blue">
                                             <div class="stat-label">งบประมาณรวม</div>
                                             <div class="stat-val" id="statTotalBudget">0 ฿</div>
-                                            <div class="stat-icon-bg">💰</div>
+                                            <div class="stat-icon-bg">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                                            </div>
                                         </div>
                                         <div class="stat-card orange">
                                             <div class="stat-label">ใช้จ่ายแล้ว</div>
                                             <div class="stat-val" id="statSpentTotal">0 ฿</div>
-                                            <div class="stat-icon-bg">💸</div>
+                                            <div class="stat-icon-bg">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                            </div>
                                         </div>
                                         <div class="stat-card green">
                                             <div class="stat-label">คงเหลือ</div>
                                             <div class="stat-val" id="statRemainingBudget">0 ฿</div>
-                                            <div class="stat-icon-bg">🍃</div>
+                                            <div class="stat-icon-bg">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -236,7 +244,7 @@
                             <div>
                                 <div class="glass-panel members-list-panel">
                                     <div class="section-header">
-                                        <h2 class="section-title">👥 สมาชิกในทริป</h2>
+                                        <h2 class="section-title">สมาชิกในทริป</h2>
                                     </div>
                                     <div class="members-scroller" id="dashboardMembersList"></div>
                                 </div>
@@ -249,7 +257,7 @@
                         <div class="itinerary-layout">
                             <div class="glass-panel timeline-container">
                                 <div class="timeline-header">
-                                    <h2 class="section-title">📍 แผนการเดินทาง</h2>
+                                    <h2 class="section-title">แผนการเดินทาง</h2>
                                     <button type="button" id="showAddItineraryModal" class="btn btn-primary btn-sm">+ เพิ่มกำหนดการ</button>
                                 </div>
                                 <div class="day-filters" id="itineraryDayFilters"></div>
@@ -272,7 +280,7 @@
                                     </div>
                                     <div class="calendar-grid" id="calendarGridDays"></div>
                                     
-                                    <h3 class="section-title" style="font-size: 0.95rem; margin-top: 20px; margin-bottom: 10px;">🔴 วันหยุดในช่วงทริป</h3>
+                                    <h3 class="section-title" style="font-size: 0.95rem; margin-top: 20px; margin-bottom: 10px;">วันหยุดในช่วงทริป</h3>
                                     <div class="holiday-list-scroller" id="tripHolidaysScroller"></div>
                                 </div>
                             </div>
@@ -284,7 +292,7 @@
                         <div class="expense-layout">
                             <div class="glass-panel expense-card">
                                 <div class="section-header" style="margin-bottom: 16px;">
-                                    <h2 class="section-title">💸 รายการใช้จ่าย</h2>
+                                    <h2 class="section-title">รายการใช้จ่าย</h2>
                                     <button type="button" id="showAddExpenseModal" class="btn btn-primary btn-sm">+ เพิ่มค่าใช้จ่าย</button>
                                 </div>
                                 <div id="expensesListContainer"></div>
@@ -292,12 +300,12 @@
                             
                             <div>
                                 <div class="glass-panel settlement-panel" style="margin-bottom: 20px;">
-                                    <h2 class="section-title" style="margin-bottom: 14px;">📊 ยอดสะสมรายคน</h2>
+                                    <h2 class="section-title" style="margin-bottom: 14px;">ยอดสะสมรายคน</h2>
                                     <div id="memberBalancesContainer"></div>
                                 </div>
                                 
                                 <div class="glass-panel settlement-panel">
-                                    <h2 class="section-title" style="margin-bottom: 4px;">🤝 สรุปเคลียร์เงิน</h2>
+                                    <h2 class="section-title" style="margin-bottom: 4px;">สรุปเคลียร์เงิน</h2>
                                     <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;">หักล้างหนี้ให้เหลือครั้งโอนน้อยที่สุด</p>
                                     <div class="settlement-list" id="optimizedSettlementsContainer"></div>
                                 </div>
@@ -310,7 +318,7 @@
                         <div class="checklist-layout">
                             <div class="glass-panel checklist-container">
                                 <div class="section-header" style="margin-bottom: 16px;">
-                                    <h2 class="section-title">🎒 รายการเตรียมของ</h2>
+                                    <h2 class="section-title">รายการเตรียมของ</h2>
                                     <button type="button" id="showAddChecklistModal" class="btn btn-primary btn-sm">+ เพิ่มของ</button>
                                 </div>
                                 
@@ -329,7 +337,7 @@
                             
                             <div>
                                 <div class="glass-panel" style="padding: 24px;">
-                                    <h2 class="section-title" style="margin-bottom: 14px;">💡 คำแนะนำ</h2>
+                                    <h2 class="section-title" style="margin-bottom: 14px;">คำแนะนำ</h2>
                                     <ul style="color: var(--text-muted); font-size: 0.85rem; padding-left: 18px; line-height: 1.7;">
                                         <li style="margin-bottom: 6px;">แยกเอกสารสำคัญไว้ที่หยิบง่าย</li>
                                         <li style="margin-bottom: 6px;">เตรียมปลั๊กไฟ Universal Adapter</li>
@@ -343,7 +351,7 @@
             
                     <!-- E. INVITATION STATUS TAB -->
                     <div id="statusTab" class="tab-content">
-                        <h2 class="section-title" style="margin-bottom: 20px;">📋 สถานะการเข้าร่วม</h2>
+                        <h2 class="section-title" style="margin-bottom: 20px;">สถานะการเข้าร่วม</h2>
                         <div class="kanban-board" id="kanbanBoardContainer"></div>
                     </div>
                 </section>
@@ -359,7 +367,7 @@
     <!-- A. CREATE TRIP MODAL -->
     <div id="createTripModal" class="modal-overlay">
         <div class="modal-card glass-panel">
-            <h2 class="section-title" style="margin-bottom: 20px;">✈️ สร้างทริปใหม่</h2>
+            <h2 class="section-title" style="margin-bottom: 20px;">สร้างทริปใหม่</h2>
             <form id="createTripForm">
                 <div class="form-group">
                     <label class="form-label" for="tripTitle">ชื่อทริป *</label>
@@ -406,7 +414,7 @@
     <!-- B. EDIT TRIP MODAL -->
     <div id="editTripModal" class="modal-overlay">
         <div class="modal-card glass-panel">
-            <h2 class="section-title" style="margin-bottom: 20px;">✏️ แก้ไขโครงการท่องเที่ยว</h2>
+            <h2 class="section-title" style="margin-bottom: 20px;">แก้ไขโครงการท่องเที่ยว</h2>
             <form id="editTripForm">
                 <input type="hidden" id="editTripId">
                 <div class="form-group">
@@ -454,7 +462,7 @@
     <!-- C. ADD EXPENSE MODAL -->
     <div id="addExpenseModal" class="modal-overlay">
         <div class="modal-card glass-panel">
-            <h2 class="section-title" style="margin-bottom: 18px;">💸 เพิ่มค่าใช้จ่าย</h2>
+            <h2 class="section-title" style="margin-bottom: 18px;">เพิ่มค่าใช้จ่าย</h2>
             <form id="addExpenseForm">
                 <div class="form-group">
                     <label class="form-label" for="expenseDescription">รายละเอียด *</label>
@@ -513,7 +521,7 @@
     <!-- D. ADD ITINERARY MODAL -->
     <div id="addItineraryModal" class="modal-overlay">
         <div class="modal-card glass-panel">
-            <h2 class="section-title" style="margin-bottom: 18px;">📍 เพิ่มแผนเที่ยว</h2>
+            <h2 class="section-title" style="margin-bottom: 18px;">เพิ่มแผนเที่ยว</h2>
             <form id="addItineraryForm">
                 <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
                     <div class="form-group">
@@ -552,7 +560,7 @@
     <!-- E. ADD CHECKLIST MODAL -->
     <div id="addChecklistModal" class="modal-overlay">
         <div class="modal-card glass-panel">
-            <h2 class="section-title" style="margin-bottom: 18px;">🎒 เพิ่มของเตรียม</h2>
+            <h2 class="section-title" style="margin-bottom: 18px;">เพิ่มของเตรียม</h2>
             <form id="addChecklistForm">
                 <div class="form-group">
                     <label class="form-label" for="checklistItemName">ชื่อสิ่งของ *</label>
@@ -587,7 +595,7 @@
     <!-- F. GLOBAL USER MODAL -->
     <div id="globalUserModal" class="modal-overlay">
         <div class="modal-card glass-panel">
-            <h2 class="section-title" id="globalUserModalTitle" style="margin-bottom: 20px;">👥 เพิ่มผู้ใช้งานใหม่</h2>
+            <h2 class="section-title" id="globalUserModalTitle" style="margin-bottom: 20px;">เพิ่มผู้ใช้งานใหม่</h2>
             <form id="globalUserForm">
                 <input type="hidden" id="globalUserId">
                 <div class="form-group">

@@ -656,10 +656,19 @@ body::before {
 }
 
 .upcoming-emoji {
-    font-size: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
     position: relative;
     z-index: 1;
-    margin-bottom: 12px;
 }
 
 .upcoming-title {
@@ -738,7 +747,19 @@ body::before {
     box-shadow: var(--shadow-lg);
 }
 
-.trip-card-emoji { font-size: 2rem; margin-bottom: 12px; }
+.trip-card-emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--apple-gray-6);
+    border: 1px solid var(--border-subtle);
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+}
 
 .trip-card-title {
     font-size: 1.15rem;
