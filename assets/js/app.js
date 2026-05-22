@@ -1,4 +1,4 @@
-﻿// assets/js/app.js
+// assets/js/app.js
 
 // ==========================================
 // GLOBAL STATE
@@ -95,18 +95,30 @@ async function checkSession() {
 
 function showLoginScreen() {
     document.getElementById("authSection").style.display = "flex";
-    document.getElementById("tripSelectorPage").style.display = "none";
-    document.getElementById("appHeader").style.display = "none";
-    document.getElementById("appContent").style.display = "none";
+    const appLayout = document.getElementById("appLayout");
+    if (appLayout) appLayout.style.display = "none";
 }
 
 function showTripSelector() {
     document.getElementById("authSection").style.display = "none";
+    const appLayout = document.getElementById("appLayout");
+    if (appLayout) appLayout.style.display = "flex";
+    
     document.getElementById("tripSelectorPage").style.display = "block";
-    document.getElementById("appHeader").style.display = "none";
     document.getElementById("appContent").style.display = "none";
     
-    document.getElementById("tripSelectorGreeting").textContent = `สวัสดี, ${currentUser.name}`;
+    const greetingEl = document.getElementById("tripSelectorGreeting");
+    if (greetingEl) {
+        greetingEl.textContent = `สวัสดี, ${currentUser.name}`;
+    }
+    
+    // Update user profile card in sidebar footer
+    document.getElementById("headerUserName").textContent = currentUser.name;
+    document.getElementById("headerUserRole").textContent = currentUser.role === 'admin' ? 'Admin' : 'Member';
+    const avatarEl = document.getElementById("sidebarAvatar");
+    if (avatarEl) {
+        avatarEl.textContent = currentUser.name.substring(0, 2).toUpperCase();
+    }
     
     // Role-based visibility
     const isAdmin = currentUser.role === 'admin';
@@ -119,13 +131,28 @@ function showTripSelector() {
 
 function showTripApp() {
     document.getElementById("authSection").style.display = "none";
+    const appLayout = document.getElementById("appLayout");
+    if (appLayout) appLayout.style.display = "flex";
+    
     document.getElementById("tripSelectorPage").style.display = "none";
-    document.getElementById("appHeader").style.display = "flex";
     document.getElementById("appContent").style.display = "block";
-    document.getElementById("navTabsContainer").style.display = "block";
     
     document.getElementById("headerUserName").textContent = currentUser.name;
     document.getElementById("headerUserRole").textContent = myTripRole === 'admin' ? 'Admin' : 'Member';
+    const avatarEl = document.getElementById("sidebarAvatar");
+    if (avatarEl) {
+        avatarEl.textContent = currentUser.name.substring(0, 2).toUpperCase();
+    }
+    
+    // Show trip section in sidebar
+    const sidebarTripSection = document.getElementById("sidebarTripSection");
+    if (sidebarTripSection) {
+        sidebarTripSection.style.display = "block";
+    }
+    
+    // In trip app, hide global creator buttons
+    document.getElementById("showCreateTripModalBtn").style.display = "none";
+    document.getElementById("showAddGlobalUserModalBtn").style.display = "none";
     
     loadTripDetails();
     switchTab("dashboard");
@@ -141,6 +168,20 @@ function setupEventListeners() {
     // Global Sub-navigation Tabs
     document.querySelectorAll(".global-nav-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => switchGlobalTab(btn.dataset.tab));
+    });
+    
+    // Sidebar toggle for mobile
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener("click", toggleSidebar);
+    }
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener("click", closeSidebar);
+    }
+    // Close sidebar when clicking links inside the sidebar
+    document.querySelectorAll(".sidebar-nav-item").forEach(item => {
+        item.addEventListener("click", closeSidebar);
     });
     
     // Trip Selector / Create Trip Checklist Setup
@@ -532,12 +573,34 @@ async function handleCreateTrip(e) {
 // TAB SWITCHING
 // ==========================================
 function switchTab(tabName) {
+    // Inside a trip tabs
     document.querySelectorAll(".nav-tab-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.tab === tabName);
     });
+    // Remove active class from global tab buttons when showing inside-trip content
+    document.querySelectorAll(".global-nav-tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+    
     document.querySelectorAll(".tab-content").forEach(tab => {
         tab.classList.toggle("active", tab.id === `${tabName}Tab`);
     });
+    
+    // Update Topbar Title
+    const tabLabels = {
+        dashboard: "แดชบอร์ด",
+        itinerary: "แผนเที่ยว",
+        expenses: "หารเงิน",
+        checklist: "จัดของ",
+        status: "สถานะเชิญ"
+    };
+    const titleText = tripDetails ? `${tripDetails.title} / ${tabLabels[tabName] || tabName}` : (tabLabels[tabName] || tabName);
+    const topTitle = document.getElementById("topbarTitle");
+    if (topTitle) topTitle.textContent = titleText;
+    
+    // Hide global action buttons inside a trip
+    document.getElementById("showCreateTripModalBtn").style.display = "none";
+    document.getElementById("showAddGlobalUserModalBtn").style.display = "none";
     
     if (tabName === "dashboard") loadTripDetails();
     else if (tabName === "expenses") loadExpenses();
@@ -588,6 +651,21 @@ function renderDashboard() {
     // Update header role
     document.getElementById("headerUserRole").textContent = myTripRole === 'admin' ? 'Admin' : 'Member';
     
+    // Update topbar title with full trip name and current tab
+    const activeTabBtn = document.querySelector(".nav-tab-btn.active");
+    const activeTabName = activeTabBtn ? activeTabBtn.dataset.tab : "dashboard";
+    const tabLabels = {
+        dashboard: "แดชบอร์ด",
+        itinerary: "แผนเที่ยว",
+        expenses: "หารเงิน",
+        checklist: "จัดของ",
+        status: "สถานะเชิญ"
+    };
+    const topTitle = document.getElementById("topbarTitle");
+    if (topTitle && tripDetails) {
+        topTitle.textContent = `${tripDetails.title} / ${tabLabels[activeTabName] || activeTabName}`;
+    }
+    
     // Members
     const container = document.getElementById("dashboardMembersList");
     container.innerHTML = "";
@@ -629,24 +707,53 @@ function renderDashboard() {
 // GLOBAL TABS & MEMBERS & TRIP EDIT/DELETE MANAGEMENT
 // ==========================================
 function switchGlobalTab(tabName) {
+    // Global tabs (Trips, Holidays, Members)
     document.querySelectorAll(".global-nav-tab-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.tab === tabName);
     });
+    // Remove active class from inside-trip tab buttons when showing global content
+    document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
     
-    // Hide all global tabs
+    // Hide inside-trip content and show global content wrapper
+    document.getElementById("tripSelectorPage").style.display = "block";
+    document.getElementById("appContent").style.display = "none";
+    
+    // Hide all global content sub-sections
     document.getElementById("tripsTabContent").style.display = "none";
     document.getElementById("holidaysTabContent").style.display = "none";
     document.getElementById("globalMembersTabContent").style.display = "none";
     
-    // Show active global tab
+    // Hide inside-trip sidebar section
+    const sidebarTripSection = document.getElementById("sidebarTripSection");
+    if (sidebarTripSection) {
+        sidebarTripSection.style.display = "none";
+    }
+    
+    // Show active global tab, update topbar title & buttons
+    const isAdmin = currentUser.role === 'admin';
+    const topbarTitle = document.getElementById("topbarTitle");
+    const createBtn = document.getElementById("showCreateTripModalBtn");
+    const addMemberBtn = document.getElementById("showAddGlobalUserModalBtn");
+    
     if (tabName === "trips-tab") {
         document.getElementById("tripsTabContent").style.display = "block";
+        if (topbarTitle) topbarTitle.textContent = "โครงการทั้งหมด";
+        if (createBtn) createBtn.style.display = isAdmin ? "inline-flex" : "none";
+        if (addMemberBtn) addMemberBtn.style.display = "none";
         renderTripSelector();
     } else if (tabName === "holidays-tab") {
         document.getElementById("holidaysTabContent").style.display = "block";
+        if (topbarTitle) topbarTitle.textContent = "ปฏิทินวันหยุด";
+        if (createBtn) createBtn.style.display = "none";
+        if (addMemberBtn) addMemberBtn.style.display = "none";
         loadHolidaysTab();
     } else if (tabName === "members-tab") {
         document.getElementById("globalMembersTabContent").style.display = "block";
+        if (topbarTitle) topbarTitle.textContent = "จัดการสมาชิก";
+        if (createBtn) createBtn.style.display = "none";
+        if (addMemberBtn) addMemberBtn.style.display = isAdmin ? "inline-flex" : "none";
         loadGlobalUsers();
     }
 }
@@ -1035,6 +1142,17 @@ async function loadExpenses() {
         const el = document.getElementById("statRemainingBudget");
         el.textContent = `${formatCurrency(remaining)} ฿`;
         el.className = remaining < 0 ? "stat-val accent" : "stat-val success";
+        
+        const remainingCard = el.closest(".stat-card");
+        if (remainingCard) {
+            if (remaining < 0) {
+                remainingCard.classList.remove("green");
+                remainingCard.classList.add("red");
+            } else {
+                remainingCard.classList.remove("red");
+                remainingCard.classList.add("green");
+            }
+        }
     } catch (err) { console.error(err); }
 }
 
@@ -1615,6 +1733,16 @@ function formatShortDate(dateStr) {
 }
 
 // Expose for inline onclick
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("sidebarOverlay").classList.toggle("active");
+}
+
+function closeSidebar() {
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("sidebarOverlay").classList.remove("active");
+}
+
 window.selectTrip = selectTrip;
 window.openEditGlobalUserModal = openEditGlobalUserModal;
 window.deleteGlobalUser = deleteGlobalUser;
@@ -1623,3 +1751,5 @@ window.deleteItinerary = deleteItinerary;
 window.toggleChecklistItem = toggleChecklistItem;
 window.deleteChecklistItem = deleteChecklistItem;
 window.updateInviteStatus = updateInviteStatus;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;

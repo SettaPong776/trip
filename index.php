@@ -38,289 +38,322 @@
     </section>
 
     <!-- ==========================================
-         2. TRIP SELECTOR PAGE (Landing Page)
+         2. MAIN APP LAYOUT (Sidebar + Main Content)
          ========================================== -->
-    <section id="tripSelectorPage" class="app-container trip-selector-page" style="display: none;">
-        <div class="trip-selector-header">
-            <div>
-                <h1>ทริปของฉัน</h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;" id="tripSelectorGreeting">สวัสดี, ผู้ใช้</p>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" id="showCreateTripModalBtn" class="btn btn-primary btn-sm" style="display: none;">✈️ สร้างทริปใหม่</button>
-                <button type="button" id="tripSelectorLogoutBtn" class="btn btn-secondary btn-sm">ออกจากระบบ</button>
-            </div>
-        </div>
+    <div id="appLayout" class="app-layout" style="display: none;">
         
-        <!-- Global Sub-navigation Bar -->
-        <div class="global-nav-tabs-container" style="margin-bottom: 24px;">
-            <nav class="global-nav-tabs">
-                <button type="button" class="global-nav-tab-btn active" data-tab="trips-tab">
-                    <span>📅 โครงการทั้งหมด</span>
-                </button>
-                <button type="button" class="global-nav-tab-btn" data-tab="holidays-tab" id="global-holidays-tab-btn">
-                    <span>🔴 ปฏิทินวันหยุด</span>
-                </button>
-                <button type="button" class="global-nav-tab-btn" data-tab="members-tab" id="global-members-tab-btn" style="display: none;">
-                    <span>👥 จัดการสมาชิก</span>
-                </button>
-            </nav>
-        </div>
-
-        <!-- A. Trips Tab Content -->
-        <div id="tripsTabContent" class="global-tab-content">
-            <!-- Upcoming Trip Banner (injected by JS) -->
-            <div id="upcomingBannerContainer"></div>
-            
-            <!-- Trips Grid -->
-            <div class="trips-grid stagger-children" id="tripsGridContainer">
-                <!-- Trip cards injected by JS -->
+        <!-- Sidebar Navigation (Apple Finder-style) -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-brand" id="backToTripsBtn">
+                <div class="brand-icon">✈️</div>
+                <span>TRIPMATE</span>
             </div>
-        </div>
-
-        <!-- B. Holidays Tab Content (Global Holiday View) -->
-        <div id="holidaysTabContent" class="global-tab-content" style="display: none;">
-            <div class="itinerary-layout">
-                <div class="glass-panel" style="padding: 28px;">
-                    <div class="calendar-header">
-                        <h2 class="section-title" id="holidaysCalendarTitle">ปฏิทินวันหยุดไทย</h2>
-                        <div class="calendar-nav">
-                            <button type="button" class="calendar-nav-btn" id="holidaysPrevMonth">◀</button>
-                            <span id="holidaysMonthLabel" style="font-weight: 700; font-size: 0.95rem; min-width: 120px; text-align: center;"></span>
-                            <button type="button" class="calendar-nav-btn" id="holidaysNextMonth">▶</button>
-                        </div>
+            
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-label">หน้าหลัก</div>
+                <button type="button" class="sidebar-nav-item global-nav-tab-btn active" data-tab="trips-tab" id="side-trips-tab">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>โครงการทั้งหมด</span>
+                </button>
+                <button type="button" class="sidebar-nav-item global-nav-tab-btn" data-tab="holidays-tab" id="global-holidays-tab-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>ปฏิทินวันหยุด</span>
+                </button>
+                <button type="button" class="sidebar-nav-item global-nav-tab-btn" data-tab="members-tab" id="global-members-tab-btn" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>จัดการสมาชิก</span>
+                </button>
+                
+                <!-- Dynamic Trip Navigation Section (Visible only inside trip) -->
+                <div id="sidebarTripSection" style="display: none;">
+                    <div class="sidebar-section-label" id="sidebarTripLabel">ทริปปัจจุบัน</div>
+                    <button type="button" class="sidebar-nav-item nav-tab-btn" data-tab="dashboard" id="tab-dashboard-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                        <span>แดชบอร์ด</span>
+                    </button>
+                    <button type="button" class="sidebar-nav-item nav-tab-btn" data-tab="itinerary" id="tab-itinerary-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>แผนเที่ยว</span>
+                    </button>
+                    <button type="button" class="sidebar-nav-item nav-tab-btn" data-tab="expenses" id="tab-expenses-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        <span>หารเงิน</span>
+                    </button>
+                    <button type="button" class="sidebar-nav-item nav-tab-btn" data-tab="checklist" id="tab-checklist-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        <span>จัดของ</span>
+                    </button>
+                    <button type="button" class="sidebar-nav-item nav-tab-btn" data-tab="status" id="tab-status-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                        <span>สถานะเชิญ</span>
+                    </button>
+                </div>
+            </nav>
+            
+            <!-- User Profile Card & Logout -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-card">
+                    <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+                    <div class="sidebar-user-info">
+                        <div class="name" id="headerUserName">ผู้ใช้</div>
+                        <div class="role" id="headerUserRole">บทบาท</div>
                     </div>
-                    <div class="calendar-grid">
-                        <div class="calendar-day-header">อา.</div>
-                        <div class="calendar-day-header">จ.</div>
-                        <div class="calendar-day-header">อ.</div>
-                        <div class="calendar-day-header">พ.</div>
-                        <div class="calendar-day-header">พฤ.</div>
-                        <div class="calendar-day-header">ศ.</div>
-                        <div class="calendar-day-header">ส.</div>
-                    </div>
-                    <div class="calendar-grid" id="holidaysCalendarGrid"></div>
+                </div>
+                <button type="button" id="logoutBtn" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px; border-radius: 8px;">ออกจากระบบ</button>
+                <!-- Keep a hidden dummy button for app.js legacy event handler -->
+                <button type="button" id="tripSelectorLogoutBtn" style="display: none;"></button>
+            </div>
+        </aside>
+        
+        <!-- Mobile Sidebar Overlay Mask -->
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            
+            <!-- Topbar (Apple style) -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button type="button" id="sidebarToggle" class="hamburger-menu" aria-label="เปิดเมนู">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <h1 class="topbar-title" id="topbarTitle">โครงการทั้งหมด</h1>
+                </div>
+                
+                <div class="topbar-right" id="topbarActions">
+                    <!-- Contextual buttons will toggle visibility dynamically based on active tab -->
+                    <button type="button" id="showCreateTripModalBtn" class="btn btn-primary btn-sm">✈️ สร้างทริปใหม่</button>
+                    <button type="button" id="showAddGlobalUserModalBtn" class="btn btn-primary btn-sm" style="display: none;">+ เพิ่มสมาชิก</button>
+                </div>
+            </header>
+            
+            <!-- Page Contents Container -->
+            <main class="page-container">
+                
+                <!-- ==========================================
+                     2.1 TRIP SELECTOR PAGE (Landing Views)
+                     ========================================== -->
+                <section id="tripSelectorPage" style="display: none;">
+                    <div id="tripSelectorGreeting" style="display: none;"></div>
                     
-                    <h3 class="section-title" style="font-size: 0.95rem; margin-top: 24px; margin-bottom: 12px;" id="holidaysListTitle">วันหยุดในเดือนนี้</h3>
-                    <div class="holiday-list-scroller" id="holidaysMonthList" style="max-height: 300px;"></div>
-                </div>
-                
-                <div>
-                    <div class="glass-panel leave-suggestions-panel">
-                        <h2 class="section-title" style="color: var(--accent-cyan); margin-bottom: 6px;">💡 แนะนำวันลาพักร้อน</h2>
-                        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;">คำนวณวันลาเพิ่มเชื่อมวันหยุดยาว</p>
-                        <div id="smartLeaveSuggestionsList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- C. Members Tab Content (Global Members Dashboard) -->
-        <div id="globalMembersTabContent" class="global-tab-content" style="display: none;">
-            <div class="glass-panel" style="padding: 24px;">
-                <div class="section-header" style="margin-bottom: 20px;">
-                    <h2 class="section-title">👥 จัดการสมาชิกในระบบ</h2>
-                    <button type="button" id="showAddGlobalUserModalBtn" class="btn btn-primary btn-sm">+ เพิ่มสมาชิก</button>
-                </div>
-                <div id="globalUserManagementContainer"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==========================================
-         3. APP HEADER (Inside Trip)
-         ========================================== -->
-    <header id="appHeader" class="app-header" style="display: none;">
-        <div class="logo-container">
-            <span class="logo-text" id="backToTripsBtn">TRIPMATE</span>
-        </div>
-        
-        <div class="nav-tabs-container" id="navTabsContainer" style="display: none;">
-            <nav class="nav-tabs" aria-label="เมนูหลัก">
-                <button type="button" class="nav-tab-btn active" data-tab="dashboard" id="tab-dashboard-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-                    <span>แดชบอร์ด</span>
-                </button>
-                <button type="button" class="nav-tab-btn" data-tab="itinerary" id="tab-itinerary-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span>แผนเที่ยว</span>
-                </button>
-                <button type="button" class="nav-tab-btn" data-tab="expenses" id="tab-expenses-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    <span>หารเงิน</span>
-                </button>
-                <button type="button" class="nav-tab-btn" data-tab="checklist" id="tab-checklist-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    <span>จัดของ</span>
-                </button>
-                <button type="button" class="nav-tab-btn" data-tab="status" id="tab-status-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                    <span>สถานะ</span>
-                </button>
-            </nav>
-        </div>
-
-        <div class="user-profile">
-            <div class="user-info">
-                <div class="user-name" id="headerUserName">ผู้ใช้</div>
-                <div class="user-role" id="headerUserRole">บทบาท</div>
-            </div>
-            <button type="button" id="logoutBtn" class="btn btn-secondary btn-sm">ออกจากระบบ</button>
-        </div>
-    </header>
-
-    <!-- ==========================================
-         4. MAIN APP CONTENT — TRIP TABS
-         ========================================== -->
-    <main id="appContent" class="app-container" style="display: none;">
-        
-        <!-- A. DASHBOARD TAB -->
-        <section id="dashboardTab" class="tab-content active">
-            <div class="welcome-banner glass-panel">
-                <div class="welcome-title" id="welcomeTripTitle">ชื่อทริป</div>
-                <div class="welcome-subtitle" id="welcomeTripDates">ช่วงวันที่</div>
-                <div id="tripCountdownText" style="font-weight: 600; color: var(--primary); font-size: 1rem; margin-top: 8px; position: relative; z-index: 1;"></div>
-            </div>
-            
-            <div class="dashboard-grid">
-                <div>
-                    <div class="glass-panel" style="padding: 24px; margin-bottom: 20px;">
-                        <h2 class="section-title" style="margin-bottom: 16px;">งบประมาณ</h2>
-                        <div class="stats-row">
-                            <div class="stat-card">
-                                <div class="stat-label">งบประมาณรวม</div>
-                                <div class="stat-val warning" id="statTotalBudget">0 ฿</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">ใช้จ่ายแล้ว</div>
-                                <div class="stat-val accent" id="statSpentTotal">0 ฿</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">คงเหลือ</div>
-                                <div class="stat-val success" id="statRemainingBudget">0 ฿</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <div class="glass-panel members-list-panel">
-                        <div class="section-header">
-                            <h2 class="section-title">👥 สมาชิกในทริป</h2>
-                        </div>
-                        <div class="members-scroller" id="dashboardMembersList"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- B. ITINERARY TAB -->
-        <section id="itineraryTab" class="tab-content">
-            <div class="itinerary-layout">
-                <div class="glass-panel timeline-container">
-                    <div class="timeline-header">
-                        <h2 class="section-title">📍 แผนการเดินทาง</h2>
-                        <button type="button" id="showAddItineraryModal" class="btn btn-primary btn-sm">+ เพิ่มกำหนดการ</button>
-                    </div>
-                    <div class="day-filters" id="itineraryDayFilters"></div>
-                    <div id="timelineEventsContainer" style="position: relative;"></div>
-                </div>
-                
-                <div>
-                    <div class="glass-panel calendar-panel">
-                        <div class="calendar-header">
-                            <h2 class="section-title" id="calendarMonthTitle">ปฏิทิน</h2>
-                        </div>
-                        <div class="calendar-grid">
-                            <div class="calendar-day-header">อา.</div>
-                            <div class="calendar-day-header">จ.</div>
-                            <div class="calendar-day-header">อ.</div>
-                            <div class="calendar-day-header">พ.</div>
-                            <div class="calendar-day-header">พฤ.</div>
-                            <div class="calendar-day-header">ศ.</div>
-                            <div class="calendar-day-header">ส.</div>
-                        </div>
-                        <div class="calendar-grid" id="calendarGridDays"></div>
+                    <!-- A. Trips Tab Content -->
+                    <div id="tripsTabContent" class="global-tab-content">
+                        <!-- Upcoming Trip Banner -->
+                        <div id="upcomingBannerContainer"></div>
                         
-                        <h3 class="section-title" style="font-size: 0.95rem; margin-top: 20px; margin-bottom: 10px;">🔴 วันหยุดในช่วงทริป</h3>
-                        <div class="holiday-list-scroller" id="tripHolidaysScroller"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- C. EXPENSES TAB -->
-        <section id="expensesTab" class="tab-content">
-            <div class="expense-layout">
-                <div class="glass-panel expense-card">
-                    <div class="section-header" style="margin-bottom: 16px;">
-                        <h2 class="section-title">💸 รายการใช้จ่าย</h2>
-                        <button type="button" id="showAddExpenseModal" class="btn btn-primary btn-sm">+ เพิ่มค่าใช้จ่าย</button>
-                    </div>
-                    <div id="expensesListContainer"></div>
-                </div>
-                
-                <div>
-                    <div class="glass-panel settlement-panel" style="margin-bottom: 20px;">
-                        <h2 class="section-title" style="margin-bottom: 14px;">📊 ยอดสะสมรายคน</h2>
-                        <div id="memberBalancesContainer"></div>
-                    </div>
-                    
-                    <div class="glass-panel settlement-panel">
-                        <h2 class="section-title" style="margin-bottom: 4px;">🤝 สรุปเคลียร์เงิน</h2>
-                        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;">หักล้างหนี้ให้เหลือครั้งโอนน้อยที่สุด</p>
-                        <div class="settlement-list" id="optimizedSettlementsContainer"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- D. CHECKLIST TAB -->
-        <section id="checklistTab" class="tab-content">
-            <div class="checklist-layout">
-                <div class="glass-panel checklist-container">
-                    <div class="section-header" style="margin-bottom: 16px;">
-                        <h2 class="section-title">🎒 รายการเตรียมของ</h2>
-                        <button type="button" id="showAddChecklistModal" class="btn btn-primary btn-sm">+ เพิ่มของ</button>
-                    </div>
-                    
-                    <div class="checklist-progress-wrapper">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                            <span>ความพร้อมสัมภาระ</span>
-                            <span id="checklistProgressText" style="font-weight: 600;">0/0 (0%)</span>
-                        </div>
-                        <div class="checklist-progress-bar">
-                            <div class="checklist-progress-fill" id="checklistProgressBarFill"></div>
+                        <!-- Trips Grid -->
+                        <h2 class="section-title" style="margin-bottom: 16px;">โครงการท่องเที่ยวทั้งหมด</h2>
+                        <div class="trips-grid stagger-children" id="tripsGridContainer">
+                            <!-- Trip cards injected by JS -->
                         </div>
                     </div>
-                    
-                    <div class="checklist-items-list" id="checklistItemsContainer"></div>
-                </div>
-                
-                <div>
-                    <div class="glass-panel" style="padding: 24px;">
-                        <h2 class="section-title" style="margin-bottom: 14px;">💡 คำแนะนำ</h2>
-                        <ul style="color: var(--text-muted); font-size: 0.85rem; padding-left: 18px; line-height: 1.7;">
-                            <li style="margin-bottom: 6px;">แยกเอกสารสำคัญไว้ที่หยิบง่าย</li>
-                            <li style="margin-bottom: 6px;">เตรียมปลั๊กไฟ Universal Adapter</li>
-                            <li style="margin-bottom: 6px;">ยาประจำตัวและยาสามัญ</li>
-                            <li>ตรวจสอบน้ำหนักกระเป๋าก่อนเดินทาง</li>
-                        </ul>
+            
+                    <!-- B. Holidays Tab Content (Global Holiday View) -->
+                    <div id="holidaysTabContent" class="global-tab-content" style="display: none;">
+                        <div class="itinerary-layout">
+                            <div class="glass-panel" style="padding: 28px;">
+                                <div class="calendar-header">
+                                    <h2 class="section-title" id="holidaysCalendarTitle">ปฏิทินวันหยุดไทย</h2>
+                                    <div class="calendar-nav">
+                                        <button type="button" class="calendar-nav-btn" id="holidaysPrevMonth">◀</button>
+                                        <span id="holidaysMonthLabel" style="font-weight: 700; font-size: 0.95rem; min-width: 120px; text-align: center;"></span>
+                                        <button type="button" class="calendar-nav-btn" id="holidaysNextMonth">▶</button>
+                                    </div>
+                                </div>
+                                <div class="calendar-grid">
+                                    <div class="calendar-day-header">อา.</div>
+                                    <div class="calendar-day-header">จ.</div>
+                                    <div class="calendar-day-header">อ.</div>
+                                    <div class="calendar-day-header">พ.</div>
+                                    <div class="calendar-day-header">พฤ.</div>
+                                    <div class="calendar-day-header">ศ.</div>
+                                    <div class="calendar-day-header">ส.</div>
+                                </div>
+                                <div class="calendar-grid" id="holidaysCalendarGrid"></div>
+                                
+                                <h3 class="section-title" style="font-size: 0.95rem; margin-top: 24px; margin-bottom: 12px;" id="holidaysListTitle">วันหยุดในเดือนนี้</h3>
+                                <div class="holiday-list-scroller" id="holidaysMonthList" style="max-height: 300px;"></div>
+                            </div>
+                            
+                            <div>
+                                <div class="glass-panel leave-suggestions-panel">
+                                    <h2 class="section-title" style="color: var(--accent-cyan); margin-bottom: 6px;">💡 แนะนำวันลาพักร้อน</h2>
+                                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;">คำนวณวันลาเพิ่มเชื่อมวันหยุดยาว</p>
+                                    <div id="smartLeaveSuggestionsList"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- E. INVITATION STATUS TAB -->
-        <section id="statusTab" class="tab-content">
-            <h2 class="section-title" style="margin-bottom: 20px;">📋 สถานะการเข้าร่วม</h2>
-            <div class="kanban-board" id="kanbanBoardContainer"></div>
-        </section>
-
-    </main>
+            
+                    <!-- C. Members Tab Content (Global Members Dashboard) -->
+                    <div id="globalMembersTabContent" class="global-tab-content" style="display: none;">
+                        <div class="glass-panel" style="padding: 24px;">
+                            <div class="section-header" style="margin-bottom: 20px;">
+                                <h2 class="section-title">👥 จัดการสมาชิกในระบบ</h2>
+                            </div>
+                            <div id="globalUserManagementContainer"></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ==========================================
+                     2.2 APP MAIN CONTENT (Inside-Trip Views)
+                     ========================================== -->
+                <section id="appContent" style="display: none;">
+                    
+                    <!-- A. DASHBOARD TAB -->
+                    <div id="dashboardTab" class="tab-content">
+                        <div class="welcome-banner glass-panel">
+                            <div class="welcome-title" id="welcomeTripTitle">ชื่อทริป</div>
+                            <div class="welcome-subtitle" id="welcomeTripDates">ช่วงวันที่</div>
+                            <div id="tripCountdownText" style="font-weight: 600; color: var(--primary); font-size: 1rem; margin-top: 8px; position: relative; z-index: 1;"></div>
+                        </div>
+                        
+                        <div class="dashboard-grid">
+                            <div>
+                                <div class="glass-panel" style="padding: 24px; margin-bottom: 20px;">
+                                    <h2 class="section-title" style="margin-bottom: 16px;">งบประมาณ</h2>
+                                    <div class="stats-row">
+                                        <div class="stat-card blue">
+                                            <div class="stat-label">งบประมาณรวม</div>
+                                            <div class="stat-val" id="statTotalBudget">0 ฿</div>
+                                            <div class="stat-icon-bg">💰</div>
+                                        </div>
+                                        <div class="stat-card orange">
+                                            <div class="stat-label">ใช้จ่ายแล้ว</div>
+                                            <div class="stat-val" id="statSpentTotal">0 ฿</div>
+                                            <div class="stat-icon-bg">💸</div>
+                                        </div>
+                                        <div class="stat-card green">
+                                            <div class="stat-label">คงเหลือ</div>
+                                            <div class="stat-val" id="statRemainingBudget">0 ฿</div>
+                                            <div class="stat-icon-bg">🍃</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="glass-panel members-list-panel">
+                                    <div class="section-header">
+                                        <h2 class="section-title">👥 สมาชิกในทริป</h2>
+                                    </div>
+                                    <div class="members-scroller" id="dashboardMembersList"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- B. ITINERARY TAB -->
+                    <div id="itineraryTab" class="tab-content">
+                        <div class="itinerary-layout">
+                            <div class="glass-panel timeline-container">
+                                <div class="timeline-header">
+                                    <h2 class="section-title">📍 แผนการเดินทาง</h2>
+                                    <button type="button" id="showAddItineraryModal" class="btn btn-primary btn-sm">+ เพิ่มกำหนดการ</button>
+                                </div>
+                                <div class="day-filters" id="itineraryDayFilters"></div>
+                                <div id="timelineEventsContainer" style="position: relative;"></div>
+                            </div>
+                            
+                            <div>
+                                <div class="glass-panel calendar-panel">
+                                    <div class="calendar-header">
+                                        <h2 class="section-title" id="calendarMonthTitle">ปฏิทิน</h2>
+                                    </div>
+                                    <div class="calendar-grid">
+                                        <div class="calendar-day-header">อา.</div>
+                                        <div class="calendar-day-header">จ.</div>
+                                        <div class="calendar-day-header">อ.</div>
+                                        <div class="calendar-day-header">พ.</div>
+                                        <div class="calendar-day-header">พฤ.</div>
+                                        <div class="calendar-day-header">ศ.</div>
+                                        <div class="calendar-day-header">ส.</div>
+                                    </div>
+                                    <div class="calendar-grid" id="calendarGridDays"></div>
+                                    
+                                    <h3 class="section-title" style="font-size: 0.95rem; margin-top: 20px; margin-bottom: 10px;">🔴 วันหยุดในช่วงทริป</h3>
+                                    <div class="holiday-list-scroller" id="tripHolidaysScroller"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- C. EXPENSES TAB -->
+                    <div id="expensesTab" class="tab-content">
+                        <div class="expense-layout">
+                            <div class="glass-panel expense-card">
+                                <div class="section-header" style="margin-bottom: 16px;">
+                                    <h2 class="section-title">💸 รายการใช้จ่าย</h2>
+                                    <button type="button" id="showAddExpenseModal" class="btn btn-primary btn-sm">+ เพิ่มค่าใช้จ่าย</button>
+                                </div>
+                                <div id="expensesListContainer"></div>
+                            </div>
+                            
+                            <div>
+                                <div class="glass-panel settlement-panel" style="margin-bottom: 20px;">
+                                    <h2 class="section-title" style="margin-bottom: 14px;">📊 ยอดสะสมรายคน</h2>
+                                    <div id="memberBalancesContainer"></div>
+                                </div>
+                                
+                                <div class="glass-panel settlement-panel">
+                                    <h2 class="section-title" style="margin-bottom: 4px;">🤝 สรุปเคลียร์เงิน</h2>
+                                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;">หักล้างหนี้ให้เหลือครั้งโอนน้อยที่สุด</p>
+                                    <div class="settlement-list" id="optimizedSettlementsContainer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- D. CHECKLIST TAB -->
+                    <div id="checklistTab" class="tab-content">
+                        <div class="checklist-layout">
+                            <div class="glass-panel checklist-container">
+                                <div class="section-header" style="margin-bottom: 16px;">
+                                    <h2 class="section-title">🎒 รายการเตรียมของ</h2>
+                                    <button type="button" id="showAddChecklistModal" class="btn btn-primary btn-sm">+ เพิ่มของ</button>
+                                </div>
+                                
+                                <div class="checklist-progress-wrapper">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                        <span>ความพร้อมสัมภาระ</span>
+                                        <span id="checklistProgressText" style="font-weight: 600;">0/0 (0%)</span>
+                                    </div>
+                                    <div class="checklist-progress-bar">
+                                        <div class="checklist-progress-fill" id="checklistProgressBarFill"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="checklist-items-list" id="checklistItemsContainer"></div>
+                            </div>
+                            
+                            <div>
+                                <div class="glass-panel" style="padding: 24px;">
+                                    <h2 class="section-title" style="margin-bottom: 14px;">💡 คำแนะนำ</h2>
+                                    <ul style="color: var(--text-muted); font-size: 0.85rem; padding-left: 18px; line-height: 1.7;">
+                                        <li style="margin-bottom: 6px;">แยกเอกสารสำคัญไว้ที่หยิบง่าย</li>
+                                        <li style="margin-bottom: 6px;">เตรียมปลั๊กไฟ Universal Adapter</li>
+                                        <li style="margin-bottom: 6px;">ยาประจำตัวและยาสามัญ</li>
+                                        <li>ตรวจสอบน้ำหนักกระเป๋าก่อนเดินทาง</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- E. INVITATION STATUS TAB -->
+                    <div id="statusTab" class="tab-content">
+                        <h2 class="section-title" style="margin-bottom: 20px;">📋 สถานะการเข้าร่วม</h2>
+                        <div class="kanban-board" id="kanbanBoardContainer"></div>
+                    </div>
+                </section>
+                
+            </main>
+        </div>
+    </div>
 
     <!-- ==========================================
-         5. MODAL DIALOGS
+         3. MODAL DIALOGS
          ========================================== -->
     
     <!-- A. CREATE TRIP MODAL -->
