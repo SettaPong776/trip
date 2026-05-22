@@ -6,7 +6,7 @@
     <title>TRIPMATE — ระบบบริหารจัดทริปท่องเที่ยวพรีเมียม</title>
     <meta name="description" content="ระบบจัดการทริปท่องเที่ยวระดับพรีเมียม จัดการหลายทริป คำนวณหารเงิน วางแผนการเดินทาง และเช็ควันหยุดไทย">
     <link rel="stylesheet" href="assets/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 

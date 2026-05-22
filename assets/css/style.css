@@ -1,58 +1,83 @@
-/* Google Fonts — Inter for ultra-clean Apple/Google feel */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;500;600;700&display=swap');
+/* Google Fonts — Inter + Noto Sans Thai for Apple-inspired typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap');
 
+/* ======================================
+   APPLE-INSPIRED DESIGN SYSTEM
+   Adapted from BudgetCut Apple Theme
+====================================== */
 :root {
-    /* Premium Dark Palette */
-    --bg-primary: #09090b;
-    --bg-secondary: #18181b;
-    --bg-elevated: #1c1c22;
-    --bg-gradient: linear-gradient(160deg, #09090b 0%, #0c0a1a 40%, #130f24 100%);
-    
-    --surface-1: rgba(255, 255, 255, 0.03);
-    --surface-2: rgba(255, 255, 255, 0.05);
-    --surface-3: rgba(255, 255, 255, 0.08);
-    --surface-hover: rgba(255, 255, 255, 0.07);
-    
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.10);
-    --border-strong: rgba(255, 255, 255, 0.15);
-    
-    --primary: #818cf8;
-    --primary-dark: #6366f1;
-    --primary-glow: rgba(129, 140, 248, 0.12);
-    --primary-glow-strong: rgba(129, 140, 248, 0.25);
-    
-    --accent-cyan: #22d3ee;
-    --accent-rose: #fb7185;
-    --accent-amber: #fbbf24;
-    --accent-emerald: #34d399;
-    --accent-violet: #a78bfa;
-    
-    --success: #34d399;
-    --warning: #fbbf24;
-    --danger: #fb7185;
-    --info: #22d3ee;
-    
-    --text-primary: #fafafa;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
-    --text-dark: #09090b;
-    
-    --font-sans: 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
-    
-    --radius-xs: 6px;
+    /* Apple-style color palette */
+    --apple-blue: #0071e3;
+    --apple-blue-hover: #0077ed;
+    --apple-blue-light: rgba(0, 113, 227, 0.08);
+    --apple-green: #34c759;
+    --apple-red: #ff3b30;
+    --apple-orange: #ff9500;
+    --apple-purple: #af52de;
+    --apple-teal: #5ac8fa;
+    --apple-indigo: #5856d6;
+
+    /* Grays — Apple's official neutral scale */
+    --apple-gray-1: #1d1d1f;
+    --apple-gray-2: #424245;
+    --apple-gray-3: #6e6e73;
+    --apple-gray-4: #86868b;
+    --apple-gray-5: #d2d2d7;
+    --apple-gray-6: #f5f5f7;
+    --apple-white: #ffffff;
+    --apple-bg: #fbfbfd;
+
+    /* Semantic mappings — keep old variable names for compatibility */
+    --bg-primary: var(--apple-bg);
+    --bg-secondary: var(--apple-white);
+    --bg-elevated: var(--apple-white);
+    --bg-gradient: linear-gradient(160deg, #fbfbfd 0%, #f2f2f7 40%, #eef2ff 100%);
+
+    --surface-1: var(--apple-white);
+    --surface-2: var(--apple-gray-6);
+    --surface-3: rgba(0, 0, 0, 0.04);
+    --surface-hover: rgba(0, 0, 0, 0.03);
+
+    --border-subtle: rgba(0, 0, 0, 0.06);
+    --border-default: rgba(0, 0, 0, 0.10);
+    --border-strong: rgba(0, 0, 0, 0.15);
+
+    --primary: var(--apple-blue);
+    --primary-dark: #005bbf;
+    --primary-glow: rgba(0, 113, 227, 0.08);
+    --primary-glow-strong: rgba(0, 113, 227, 0.18);
+
+    --accent-cyan: var(--apple-teal);
+    --accent-rose: var(--apple-red);
+    --accent-amber: var(--apple-orange);
+    --accent-emerald: var(--apple-green);
+    --accent-violet: var(--apple-purple);
+
+    --success: var(--apple-green);
+    --warning: var(--apple-orange);
+    --danger: var(--apple-red);
+    --info: var(--apple-teal);
+
+    --text-primary: var(--apple-gray-1);
+    --text-secondary: var(--apple-gray-3);
+    --text-muted: var(--apple-gray-4);
+    --text-dark: var(--apple-gray-1);
+
+    --font-sans: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+
+    --radius-xs: 8px;
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 20px;
-    --radius-xl: 28px;
-    --radius-full: 9999px;
-    
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
-    --shadow-glow: 0 0 30px rgba(129, 140, 248, 0.08);
-    
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --radius-xl: 24px;
+    --radius-full: 980px;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+    --shadow-glow: 0 0 30px rgba(0, 113, 227, 0.06);
+
+    --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-fast: 0.15s var(--ease-out);
     --transition-normal: 0.25s var(--ease-out);
@@ -69,7 +94,7 @@ html { scroll-behavior: smooth; }
 
 body {
     font-family: var(--font-sans);
-    background: var(--bg-primary);
+    background: var(--apple-bg);
     background-image: var(--bg-gradient);
     background-attachment: fixed;
     color: var(--text-primary);
@@ -79,32 +104,27 @@ body {
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
 }
 
-/* Subtle noise texture overlay */
+/* Remove dark noise texture — Apple uses clean backgrounds */
 body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    opacity: 0.015;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
+    display: none;
 }
 
-/* Glass Panel */
+/* Glass Panel — Apple Frosted Glass (Light) */
 .glass-panel {
-    background: var(--surface-1);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    background: var(--apple-white);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .glass-panel:hover {
-    border-color: var(--border-default);
+    box-shadow: var(--shadow-md);
 }
 
 /* ==========================================
@@ -118,6 +138,7 @@ body::before {
     padding: 24px;
     position: relative;
     z-index: 1;
+    background: linear-gradient(160deg, #fbfbfd 0%, #e8ecf4 50%, #dce3f9 100%);
 }
 
 .auth-card {
@@ -126,10 +147,11 @@ body::before {
     padding: 48px 36px;
     text-align: center;
     animation: authEnter 0.7s var(--ease-spring);
-    background: var(--surface-2);
-    border: 1px solid var(--border-default);
+    background: var(--apple-white);
+    border: 1px solid var(--border-subtle);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-lg);
 }
 
 .auth-card::before {
@@ -140,7 +162,7 @@ body::before {
     transform: translateX(-50%);
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0,113,227,0.06) 0%, transparent 70%);
     z-index: 0;
     pointer-events: none;
 }
@@ -153,7 +175,7 @@ body::before {
 .auth-logo {
     font-size: 2.4rem;
     font-weight: 900;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 50%, var(--accent-violet) 100%);
+    background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-indigo) 50%, var(--apple-purple) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -164,14 +186,14 @@ body::before {
 }
 
 .auth-subtitle {
-    color: var(--text-muted);
+    color: var(--apple-gray-3);
     font-size: 0.9rem;
     margin-bottom: 36px;
     position: relative;
     z-index: 1;
 }
 
-/* PIN Inputs */
+/* PIN Inputs — Apple style */
 .pin-container {
     display: flex;
     justify-content: center;
@@ -185,20 +207,20 @@ body::before {
     width: 48px;
     height: 58px;
     border-radius: var(--radius-sm);
-    border: 2px solid var(--border-default);
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    border: 1.5px solid var(--apple-gray-5);
+    background: var(--apple-white);
+    color: var(--apple-gray-1);
     font-size: 1.6rem;
     font-weight: 700;
     text-align: center;
     outline: none;
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
     font-family: var(--font-sans);
 }
 
 .pin-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-glow);
+    border-color: var(--apple-blue);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
     transform: translateY(-2px);
 }
 
@@ -209,20 +231,20 @@ body::before {
     40%, 80% { transform: translateX(8px); }
 }
 
-/* Buttons */
+/* Buttons — Apple Pill style */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 24px;
+    gap: 6px;
+    padding: 10px 20px;
     border-radius: var(--radius-full);
     font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-weight: 500;
+    font-size: 0.88rem;
     border: none;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
     outline: none;
     text-decoration: none;
     white-space: nowrap;
@@ -231,36 +253,40 @@ body::before {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--apple-blue);
     color: white;
-    box-shadow: 0 2px 12px rgba(129, 140, 248, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4);
+    background: var(--apple-blue-hover);
+    transform: scale(1.03);
+    box-shadow: 0 4px 14px rgba(0, 113, 227, 0.35);
 }
 
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:active { transform: scale(1); }
 
 .btn-secondary {
-    background: var(--surface-2);
-    color: var(--text-primary);
-    border: 1px solid var(--border-default);
+    background: var(--apple-gray-6);
+    color: var(--apple-gray-2);
+    border: 1px solid var(--apple-gray-5);
 }
 
 .btn-secondary:hover {
-    background: var(--surface-3);
-    transform: translateY(-1px);
+    background: var(--apple-gray-5);
+    color: var(--apple-gray-1);
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, var(--danger) 0%, #e11d48 100%);
+    background: var(--apple-red);
     color: white;
-    box-shadow: 0 2px 12px rgba(251, 113, 133, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.25);
 }
 
-.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(251, 113, 133, 0.4); }
+.btn-danger:hover {
+    background: #e0342b;
+    transform: scale(1.03);
+}
 
 .btn-sm { padding: 8px 16px; font-size: 0.82rem; }
 .btn-xs { padding: 6px 12px; font-size: 0.78rem; }
@@ -268,44 +294,44 @@ body::before {
 .btn-icon {
     background: none;
     border: none;
-    color: var(--text-muted);
+    color: var(--apple-gray-3);
     cursor: pointer;
     padding: 6px;
     border-radius: var(--radius-sm);
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
 .btn-icon:hover {
-    color: var(--text-primary);
-    background: var(--surface-3);
+    color: var(--apple-gray-1);
+    background: rgba(0,0,0,0.05);
 }
 
 /* ==========================================
-   APP HEADER
+   APP HEADER — Apple-style Top Bar
    ========================================== */
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 32px;
+    padding: 14px 32px;
     border-bottom: 1px solid var(--border-subtle);
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(9, 9, 11, 0.85);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    background: rgba(251, 251, 253, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 .logo-container { display: flex; align-items: center; gap: 8px; }
 
 .logo-text {
     font-size: 1.5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-indigo) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -318,7 +344,7 @@ body::before {
 .nav-tabs {
     display: flex;
     gap: 4px;
-    background: var(--surface-1);
+    background: rgba(0,0,0,0.04);
     padding: 4px;
     border-radius: var(--radius-full);
     border: 1px solid var(--border-subtle);
@@ -327,28 +353,28 @@ body::before {
 .nav-tab-btn {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--apple-gray-3);
     font-family: var(--font-sans);
     font-weight: 500;
     font-size: 0.85rem;
     padding: 8px 16px;
     border-radius: var(--radius-full);
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
 .nav-tab-btn:hover {
-    color: var(--text-primary);
-    background: var(--surface-2);
+    color: var(--apple-gray-1);
+    background: rgba(0,0,0,0.04);
 }
 
 .nav-tab-btn.active {
     color: white;
-    background: var(--primary-dark);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    background: var(--apple-blue);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
 }
 
 .nav-tab-btn svg { width: 16px; height: 16px; }
@@ -360,16 +386,16 @@ body::before {
 }
 
 .user-info { text-align: right; }
-.user-name { font-weight: 600; font-size: 0.9rem; }
-.user-role { font-size: 0.78rem; color: var(--accent-cyan); font-weight: 500; }
+.user-name { font-weight: 600; font-size: 0.9rem; color: var(--apple-gray-1); }
+.user-role { font-size: 0.78rem; color: var(--apple-blue); font-weight: 500; }
 
 /* ==========================================
    APP CONTENT
    ========================================== */
 .app-container {
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 32px 24px 120px;
+    padding: 28px 32px 120px;
     position: relative;
     z-index: 1;
 }
@@ -383,7 +409,7 @@ body::before {
 }
 
 /* ==========================================
-   TRIP SELECTOR PAGE
+   TRIP SELECTOR PAGE — Apple Layout
    ========================================== */
 .trip-selector-page { animation: tabEnter 0.4s var(--ease-out); }
 
@@ -391,32 +417,34 @@ body::before {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
 }
 
 .trip-selector-header h1 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--apple-gray-1);
+    line-height: 1.2;
 }
 
-/* Upcoming Trip Banner */
+/* Upcoming Trip Banner — Apple Gradient Hero */
 .upcoming-banner {
     position: relative;
-    padding: 40px;
+    padding: 36px 32px;
     border-radius: var(--radius-xl);
     overflow: hidden;
-    margin-bottom: 32px;
-    background: linear-gradient(135deg, rgba(129,140,248,0.12) 0%, rgba(34,211,238,0.08) 100%);
-    border: 1px solid rgba(129,140,248,0.15);
+    margin-bottom: 28px;
+    background: linear-gradient(135deg, var(--apple-gray-1) 0%, #2c2c2e 100%);
+    border: none;
     cursor: pointer;
     transition: all var(--transition-normal);
+    color: white;
 }
 
 .upcoming-banner:hover {
-    border-color: rgba(129,140,248,0.3);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(129,140,248,0.1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
 }
 
 .upcoming-banner::before {
@@ -424,9 +452,9 @@ body::before {
     position: absolute;
     top: -80px;
     right: -40px;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, var(--primary-glow-strong) 0%, transparent 70%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
     z-index: 0;
 }
 
@@ -434,9 +462,9 @@ body::before {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: var(--primary-glow);
-    border: 1px solid rgba(129,140,248,0.2);
-    color: var(--primary);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: white;
     padding: 4px 14px;
     border-radius: var(--radius-full);
     font-size: 0.78rem;
@@ -455,15 +483,16 @@ body::before {
 
 .upcoming-title {
     font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     position: relative;
     z-index: 1;
     margin-bottom: 8px;
+    color: white;
 }
 
 .upcoming-dates {
-    color: var(--text-secondary);
+    color: rgba(255,255,255,0.7);
     font-size: 1rem;
     position: relative;
     z-index: 1;
@@ -482,16 +511,16 @@ body::before {
     align-items: center;
     gap: 6px;
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: rgba(255,255,255,0.6);
 }
 
-.upcoming-meta-item strong { color: var(--text-primary); }
+.upcoming-meta-item strong { color: white; }
 
 .countdown-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-violet) 100%);
+    background: var(--apple-blue);
     color: white;
     padding: 8px 20px;
     border-radius: var(--radius-full);
@@ -500,9 +529,10 @@ body::before {
     margin-top: 8px;
     position: relative;
     z-index: 1;
+    box-shadow: 0 4px 12px rgba(0,113,227,0.3);
 }
 
-/* Trip Grid */
+/* Trip Grid — Apple Cards */
 .trips-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -512,16 +542,17 @@ body::before {
 .trip-card {
     padding: 24px;
     border-radius: var(--radius-lg);
-    background: var(--surface-1);
+    background: var(--apple-white);
     border: 1px solid var(--border-subtle);
     cursor: pointer;
-    transition: all var(--transition-normal);
+    transition: all 0.3s var(--ease-out);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .trip-card:hover {
-    border-color: var(--border-strong);
+    border-color: var(--border-default);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
@@ -530,14 +561,15 @@ body::before {
 
 .trip-card-title {
     font-size: 1.15rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 6px;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.02em;
+    color: var(--apple-gray-1);
 }
 
 .trip-card-dates {
     font-size: 0.82rem;
-    color: var(--text-muted);
+    color: var(--apple-gray-4);
     margin-bottom: 12px;
 }
 
@@ -552,7 +584,7 @@ body::before {
     align-items: center;
     gap: 6px;
     font-size: 0.82rem;
-    color: var(--text-secondary);
+    color: var(--apple-gray-3);
 }
 
 .trip-status-pill {
@@ -563,33 +595,35 @@ body::before {
 }
 
 .trip-status-upcoming {
-    background: var(--primary-glow);
-    color: var(--primary);
-    border: 1px solid rgba(129,140,248,0.2);
+    background: rgba(0, 113, 227, 0.08);
+    color: var(--apple-blue);
+    border: 1px solid rgba(0, 113, 227, 0.15);
 }
 
 .trip-status-active {
-    background: rgba(52,211,153,0.12);
-    color: var(--success);
-    border: 1px solid rgba(52,211,153,0.2);
+    background: rgba(52, 199, 89, 0.08);
+    color: var(--apple-green);
+    border: 1px solid rgba(52, 199, 89, 0.15);
 }
 
 .trip-status-completed {
-    background: var(--surface-2);
-    color: var(--text-muted);
+    background: var(--apple-gray-6);
+    color: var(--apple-gray-4);
     border: 1px solid var(--border-subtle);
 }
 
 /* ==========================================
-   DASHBOARD TAB
+   DASHBOARD TAB — Apple Widget Style
    ========================================== */
 .welcome-banner {
-    padding: 36px;
+    padding: 36px 32px;
     position: relative;
     overflow: hidden;
     margin-bottom: 24px;
-    background: linear-gradient(135deg, rgba(129,140,248,0.08) 0%, rgba(34,211,238,0.05) 100%);
-    border: 1px solid rgba(129,140,248,0.1);
+    background: linear-gradient(135deg, var(--apple-gray-1) 0%, #2c2c2e 100%);
+    border: none;
+    color: white;
+    border-radius: var(--radius-xl);
 }
 
 .welcome-banner::before {
@@ -599,24 +633,27 @@ body::before {
     right: -15%;
     width: 350px;
     height: 350px;
-    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
     z-index: 0;
+    pointer-events: none;
 }
 
 .welcome-title {
     font-size: 1.8rem;
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 6px;
     position: relative;
     z-index: 1;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.03em;
+    color: white;
 }
 
 .welcome-subtitle {
-    color: var(--text-secondary);
+    color: rgba(255,255,255,0.6);
     font-size: 0.95rem;
     position: relative;
     z-index: 1;
+    font-weight: 400;
 }
 
 .dashboard-grid {
@@ -634,28 +671,34 @@ body::before {
 }
 
 .stat-card {
-    padding: 20px;
-    border-radius: var(--radius-md);
-    background: var(--surface-1);
+    padding: 22px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--apple-white);
     border: 1px solid var(--border-subtle);
-    transition: var(--transition-fast);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
 }
 
-.stat-card:hover { border-color: var(--border-default); }
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: scale(1.02);
+}
 
 .stat-label {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: var(--apple-gray-4);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    font-weight: 600;
 }
 
-.stat-val { font-size: 1.5rem; font-weight: 700; }
-.stat-val.accent { color: var(--accent-cyan); }
-.stat-val.warning { color: var(--warning); }
-.stat-val.success { color: var(--success); }
+.stat-val { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+.stat-val.accent { color: var(--apple-blue); }
+.stat-val.warning { color: var(--apple-orange); }
+.stat-val.success { color: var(--apple-green); }
 
 /* Section */
 .section-header {
@@ -667,8 +710,9 @@ body::before {
 
 .section-title {
     font-size: 1.15rem;
-    font-weight: 700;
-    letter-spacing: -0.3px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--apple-gray-1);
 }
 
 /* Members */
@@ -693,13 +737,13 @@ body::before {
     align-items: center;
     padding: 14px 16px;
     border-radius: var(--radius-md);
-    background: var(--surface-1);
+    background: var(--apple-gray-6);
     border: 1px solid var(--border-subtle);
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .member-row-card:hover {
-    background: var(--surface-2);
+    background: rgba(0,113,227,0.03);
     border-color: var(--border-default);
 }
 
@@ -709,7 +753,7 @@ body::before {
     width: 38px;
     height: 38px;
     border-radius: var(--radius-full);
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-violet) 100%);
+    background: linear-gradient(135deg, var(--apple-blue), var(--apple-indigo));
     color: white;
     display: flex;
     align-items: center;
@@ -717,9 +761,10 @@ body::before {
     font-weight: 700;
     font-size: 0.85rem;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,113,227,0.2);
 }
 
-.member-info-text .name { font-weight: 600; font-size: 0.9rem; }
+.member-info-text .name { font-weight: 600; font-size: 0.9rem; color: var(--apple-gray-1); }
 
 .badge {
     font-size: 0.7rem;
@@ -731,32 +776,33 @@ body::before {
 }
 
 .badge-admin {
-    background: rgba(251, 191, 36, 0.12);
-    color: var(--warning);
-    border: 1px solid rgba(251, 191, 36, 0.2);
+    background: rgba(255, 149, 0, 0.1);
+    color: var(--apple-orange);
+    border: 1px solid rgba(255, 149, 0, 0.2);
 }
 
 .badge-member {
-    background: var(--surface-2);
-    color: var(--text-muted);
+    background: var(--apple-gray-6);
+    color: var(--apple-gray-4);
     border: 1px solid var(--border-subtle);
 }
 
 .passcode-container { display: flex; align-items: center; gap: 6px; }
 
 .passcode-text {
-    font-family: 'SF Mono', 'Menlo', monospace;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: 2px;
-    background: var(--bg-primary);
+    background: var(--apple-gray-6);
     padding: 4px 10px;
     border-radius: var(--radius-xs);
     border: 1px solid var(--border-subtle);
+    color: var(--apple-gray-2);
 }
 
 /* ==========================================
-   INVITATION STATUS BOARD
+   INVITATION STATUS BOARD — Apple Kanban
    ========================================== */
 .kanban-board {
     display: grid;
@@ -765,11 +811,12 @@ body::before {
 }
 
 .kanban-column {
-    background: var(--surface-1);
+    background: var(--apple-white);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 20px;
     min-height: 200px;
+    box-shadow: var(--shadow-sm);
 }
 
 .kanban-header {
@@ -783,24 +830,25 @@ body::before {
 
 .kanban-header-icon { font-size: 1.2rem; }
 
-.kanban-header-title { font-weight: 700; font-size: 0.9rem; }
+.kanban-header-title { font-weight: 600; font-size: 0.9rem; color: var(--apple-gray-1); }
 
 .kanban-count {
     margin-left: auto;
-    background: var(--surface-3);
+    background: var(--apple-gray-6);
     padding: 2px 8px;
     border-radius: var(--radius-full);
     font-size: 0.75rem;
     font-weight: 600;
+    color: var(--apple-gray-3);
 }
 
 .kanban-card {
     padding: 14px;
     border-radius: var(--radius-md);
-    background: var(--surface-2);
+    background: var(--apple-gray-6);
     border: 1px solid var(--border-subtle);
     margin-bottom: 8px;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -809,9 +857,10 @@ body::before {
 .kanban-card:hover {
     border-color: var(--border-default);
     transform: translateX(3px);
+    background: rgba(0,113,227,0.03);
 }
 
-.kanban-card-name { font-weight: 600; font-size: 0.88rem; }
+.kanban-card-name { font-weight: 600; font-size: 0.88rem; color: var(--apple-gray-1); }
 
 .status-dot {
     width: 8px;
@@ -820,12 +869,12 @@ body::before {
     flex-shrink: 0;
 }
 
-.status-dot-accepted { background: var(--success); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
-.status-dot-pending { background: var(--warning); box-shadow: 0 0 6px rgba(251,191,36,0.4); }
-.status-dot-declined { background: var(--danger); box-shadow: 0 0 6px rgba(251,113,133,0.4); }
+.status-dot-accepted { background: var(--apple-green); box-shadow: 0 0 6px rgba(52,199,89,0.4); }
+.status-dot-pending { background: var(--apple-orange); box-shadow: 0 0 6px rgba(255,149,0,0.4); }
+.status-dot-declined { background: var(--apple-red); box-shadow: 0 0 6px rgba(255,59,48,0.4); }
 
 /* ==========================================
-   EXPENSES
+   EXPENSES — Apple Clean Layout
    ========================================== */
 .expense-layout {
     display: grid;
@@ -841,14 +890,14 @@ body::before {
     align-items: center;
     padding: 14px 16px;
     border-radius: var(--radius-md);
-    background: var(--surface-1);
+    background: var(--apple-gray-6);
     border: 1px solid var(--border-subtle);
     margin-bottom: 10px;
-    transition: var(--transition-normal);
+    transition: all var(--transition-normal);
 }
 
 .expense-item:hover {
-    background: var(--surface-2);
+    background: rgba(0,113,227,0.03);
     border-color: var(--border-default);
     transform: translateX(3px);
 }
@@ -866,15 +915,15 @@ body::before {
     flex-shrink: 0;
 }
 
-.cat-food { background: rgba(251,113,133,0.1); }
-.cat-travel { background: rgba(129,140,248,0.1); }
-.cat-hotel { background: rgba(34,211,238,0.1); }
-.cat-shopping { background: rgba(251,191,36,0.1); }
-.cat-general { background: rgba(52,211,153,0.1); }
+.cat-food { background: rgba(255,59,48,0.08); }
+.cat-travel { background: rgba(0,113,227,0.08); }
+.cat-hotel { background: rgba(90,200,250,0.08); }
+.cat-shopping { background: rgba(255,149,0,0.08); }
+.cat-general { background: rgba(52,199,89,0.08); }
 
 .expense-title-desc { display: flex; flex-direction: column; }
-.expense-title-desc .title { font-weight: 600; font-size: 0.95rem; }
-.expense-title-desc .meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.expense-title-desc .title { font-weight: 600; font-size: 0.95rem; color: var(--apple-gray-1); }
+.expense-title-desc .meta { font-size: 0.78rem; color: var(--apple-gray-4); margin-top: 2px; }
 
 .expense-right {
     text-align: right;
@@ -884,12 +933,12 @@ body::before {
     gap: 4px;
 }
 
-.expense-price { font-size: 1.1rem; font-weight: 700; }
+.expense-price { font-size: 1.1rem; font-weight: 700; color: var(--apple-gray-1); }
 
 .expense-splits-pill {
     font-size: 0.7rem;
-    color: var(--text-muted);
-    background: var(--surface-2);
+    color: var(--apple-gray-4);
+    background: rgba(0,0,0,0.04);
     padding: 2px 8px;
     border-radius: var(--radius-full);
 }
@@ -899,8 +948,8 @@ body::before {
 .settlement-list { display: flex; flex-direction: column; gap: 10px; }
 
 .settlement-row {
-    background: rgba(52,211,153,0.05);
-    border: 1px solid rgba(52,211,153,0.12);
+    background: rgba(52,199,89,0.05);
+    border: 1px solid rgba(52,199,89,0.12);
     padding: 14px;
     border-radius: var(--radius-md);
     display: flex;
@@ -908,12 +957,12 @@ body::before {
     align-items: center;
 }
 
-.settle-people { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.9rem; }
-.settle-arrow { color: var(--success); font-size: 1.1rem; }
-.settle-amount { font-weight: 800; color: var(--success); font-size: 1.05rem; }
+.settle-people { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.9rem; color: var(--apple-gray-1); }
+.settle-arrow { color: var(--apple-green); font-size: 1.1rem; }
+.settle-amount { font-weight: 800; color: var(--apple-green); font-size: 1.05rem; }
 
 /* ==========================================
-   ITINERARY / TIMELINE
+   ITINERARY / TIMELINE — Apple Clean
    ========================================== */
 .itinerary-layout {
     display: grid;
@@ -939,26 +988,26 @@ body::before {
 }
 
 .day-filter-btn {
-    background: var(--surface-1);
+    background: var(--apple-gray-6);
     border: 1px solid var(--border-subtle);
-    color: var(--text-muted);
+    color: var(--apple-gray-3);
     padding: 7px 14px;
     border-radius: var(--radius-full);
     font-family: var(--font-sans);
     font-weight: 600;
     font-size: 0.8rem;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 
-.day-filter-btn:hover { background: var(--surface-2); color: var(--text-primary); }
+.day-filter-btn:hover { background: var(--apple-gray-5); color: var(--apple-gray-1); }
 
 .day-filter-btn.active {
-    background: var(--accent-cyan);
-    color: var(--text-dark);
+    background: var(--apple-blue);
+    color: white;
     border-color: transparent;
-    box-shadow: 0 2px 8px rgba(34,211,238,0.25);
+    box-shadow: 0 2px 8px rgba(0,113,227,0.25);
 }
 
 .timeline-line {
@@ -967,7 +1016,7 @@ body::before {
     top: 120px;
     bottom: 40px;
     width: 2px;
-    background: var(--border-subtle);
+    background: var(--apple-gray-5);
 }
 
 .timeline-item {
@@ -982,7 +1031,7 @@ body::before {
     width: 56px;
     text-align: right;
     font-weight: 700;
-    color: var(--accent-cyan);
+    color: var(--apple-blue);
     font-size: 0.88rem;
     padding-top: 14px;
 }
@@ -991,41 +1040,43 @@ body::before {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--accent-cyan);
-    border: 3px solid var(--bg-primary);
+    background: var(--apple-blue);
+    border: 3px solid var(--apple-bg);
     z-index: 2;
     margin-top: 16px;
-    box-shadow: 0 0 0 3px rgba(34,211,238,0.15);
+    box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
     flex-shrink: 0;
 }
 
 .timeline-body {
     flex: 1;
     padding: 18px;
-    background: var(--surface-1);
+    background: var(--apple-white);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
 }
 
-.timeline-body:hover { background: var(--surface-2); border-color: var(--border-default); }
+.timeline-body:hover { background: var(--apple-gray-6); border-color: var(--border-default); }
 
 .timeline-body-title {
     font-size: 1.05rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 4px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    color: var(--apple-gray-1);
 }
 
-.timeline-body-notes { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px; }
+.timeline-body-notes { color: var(--apple-gray-3); font-size: 0.85rem; margin-bottom: 10px; }
 
 .location-link {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: var(--accent-cyan);
+    color: var(--apple-blue);
     text-decoration: none;
     font-size: 0.82rem;
     font-weight: 500;
@@ -1034,7 +1085,7 @@ body::before {
 .location-link:hover { text-decoration: underline; }
 
 /* ==========================================
-   CALENDAR
+   CALENDAR — Apple iOS style
    ========================================== */
 .calendar-panel { padding: 24px; }
 
@@ -1052,9 +1103,9 @@ body::before {
 }
 
 .calendar-nav-btn {
-    background: var(--surface-2);
+    background: var(--apple-gray-6);
     border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
+    color: var(--apple-gray-1);
     width: 32px;
     height: 32px;
     border-radius: var(--radius-full);
@@ -1063,10 +1114,10 @@ body::before {
     align-items: center;
     justify-content: center;
     font-size: 0.9rem;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
-.calendar-nav-btn:hover { background: var(--surface-3); }
+.calendar-nav-btn:hover { background: var(--apple-gray-5); }
 
 .calendar-grid {
     display: grid;
@@ -1078,8 +1129,10 @@ body::before {
 .calendar-day-header {
     font-weight: 600;
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: var(--apple-gray-4);
     padding: 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .calendar-day-cell {
@@ -1094,31 +1147,33 @@ body::before {
     cursor: pointer;
     background: transparent;
     border: 1px solid transparent;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     font-weight: 500;
+    color: var(--apple-gray-1);
 }
 
-.calendar-day-cell:hover { background: var(--surface-2); }
+.calendar-day-cell:hover { background: var(--apple-gray-6); }
 
 .calendar-day-cell.inactive { opacity: 0.2; cursor: default; }
 
 .calendar-day-cell.today {
-    background: var(--primary-glow);
-    border-color: var(--primary);
-    color: var(--primary);
+    background: var(--apple-blue);
+    color: white;
     font-weight: 700;
+    border-radius: 50%;
 }
 
 .calendar-day-cell.trip-date {
-    background: var(--primary-glow);
-    border-color: rgba(129,140,248,0.2);
+    background: rgba(0,113,227,0.08);
+    border-color: rgba(0,113,227,0.2);
     font-weight: 600;
+    color: var(--apple-blue);
 }
 
 .calendar-day-cell.holiday {
-    background: rgba(251,191,36,0.1);
-    border-color: rgba(251,191,36,0.2);
-    color: var(--warning);
+    background: rgba(255,59,48,0.06);
+    border-color: rgba(255,59,48,0.15);
+    color: var(--apple-red);
     font-weight: 700;
 }
 
@@ -1127,7 +1182,7 @@ body::before {
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--accent-cyan);
+    background: var(--apple-blue);
     position: absolute;
     bottom: 4px;
 }
@@ -1147,37 +1202,40 @@ body::before {
     gap: 10px;
     padding: 10px 12px;
     border-radius: var(--radius-sm);
-    background: rgba(251,191,36,0.04);
-    border: 1px solid rgba(251,191,36,0.08);
+    background: rgba(255,59,48,0.04);
+    border: 1px solid rgba(255,59,48,0.08);
     font-size: 0.82rem;
+    color: var(--apple-gray-2);
 }
 
 .holiday-item-row .date {
     font-weight: 700;
-    color: var(--warning);
+    color: var(--apple-red);
     white-space: nowrap;
 }
 
 /* Leave Suggestions */
 .leave-suggestions-panel {
     padding: 20px;
-    background: rgba(34,211,238,0.04);
-    border: 1px solid rgba(34,211,238,0.1);
+    background: rgba(0,113,227,0.03);
+    border: 1px solid rgba(0,113,227,0.08);
     border-radius: var(--radius-lg);
 }
 
 .suggestion-card {
-    background: var(--surface-1);
+    background: var(--apple-white);
     border: 1px solid var(--border-subtle);
     padding: 12px 14px;
     border-radius: var(--radius-sm);
     margin-top: 8px;
     font-size: 0.82rem;
-    border-left: 3px solid var(--accent-cyan);
+    border-left: 3px solid var(--apple-blue);
+    color: var(--apple-gray-2);
+    box-shadow: var(--shadow-sm);
 }
 
 /* ==========================================
-   CHECKLIST
+   CHECKLIST — Apple Clean
    ========================================== */
 .checklist-layout {
     display: grid;
@@ -1191,7 +1249,7 @@ body::before {
 
 .checklist-progress-bar {
     height: 6px;
-    background: var(--surface-3);
+    background: var(--apple-gray-6);
     border-radius: var(--radius-full);
     overflow: hidden;
     margin-top: 8px;
@@ -1199,7 +1257,7 @@ body::before {
 
 .checklist-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent-cyan) 0%, var(--primary) 100%);
+    background: linear-gradient(90deg, var(--apple-blue) 0%, var(--apple-indigo) 100%);
     width: 0%;
     transition: width 0.5s var(--ease-out);
     border-radius: var(--radius-full);
@@ -1213,12 +1271,13 @@ body::before {
     align-items: center;
     padding: 14px 16px;
     border-radius: var(--radius-md);
-    background: var(--surface-1);
+    background: var(--apple-white);
     border: 1px solid var(--border-subtle);
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
 }
 
-.checklist-item-row:hover { background: var(--surface-2); }
+.checklist-item-row:hover { background: var(--apple-gray-6); }
 .checklist-item-row.completed { opacity: 0.5; }
 
 .checkbox-label {
@@ -1229,26 +1288,27 @@ body::before {
     font-weight: 500;
     flex: 1;
     font-size: 0.9rem;
+    color: var(--apple-gray-1);
 }
 
 .checkbox-custom {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--border-default);
+    border: 2px solid var(--apple-gray-5);
     border-radius: var(--radius-xs);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition-fast);
-    background: var(--bg-primary);
+    transition: all 0.2s ease;
+    background: var(--apple-white);
     flex-shrink: 0;
 }
 
 .checkbox-label input[type="checkbox"] { display: none; }
 
 .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--apple-blue);
+    border-color: var(--apple-blue);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
@@ -1260,26 +1320,26 @@ body::before {
 
 .checkbox-label input[type="checkbox"]:checked ~ .item-name-text {
     text-decoration: line-through;
-    color: var(--text-muted);
+    color: var(--apple-gray-4);
 }
 
 .item-assigned-pill {
     font-size: 0.7rem;
     padding: 2px 8px;
     border-radius: var(--radius-full);
-    background: var(--primary-glow);
-    color: var(--primary);
-    border: 1px solid rgba(129,140,248,0.15);
+    background: rgba(0,113,227,0.08);
+    color: var(--apple-blue);
+    border: 1px solid rgba(0,113,227,0.12);
     margin-left: 6px;
 }
 
 /* ==========================================
-   MODALS
+   MODALS — Apple Sheet Style
    ========================================== */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     z-index: 1000;
@@ -1299,10 +1359,12 @@ body::before {
     max-width: 520px;
     padding: 32px;
     animation: modalEnter 0.35s var(--ease-spring);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
+    background: var(--apple-white);
+    border: 1px solid var(--border-subtle);
     max-height: 90vh;
     overflow-y: auto;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.15);
 }
 
 @keyframes modalEnter {
@@ -1314,28 +1376,28 @@ body::before {
 
 .form-label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
+    font-size: 0.82rem;
+    color: var(--apple-gray-2);
 }
 
 .form-input, .form-select, .form-textarea {
     width: 100%;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-default);
+    background: var(--apple-white);
+    border: 1px solid var(--apple-gray-5);
     border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    padding: 11px 14px;
+    color: var(--apple-gray-1);
+    padding: 10px 14px;
     outline: none;
     font-family: var(--font-sans);
     font-size: 0.9rem;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-glow);
+    border-color: var(--apple-blue);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
 }
 
 .form-textarea { resize: vertical; min-height: 80px; }
@@ -1353,10 +1415,11 @@ body::before {
     align-items: center;
     padding: 8px 0;
     border-bottom: 1px solid var(--border-subtle);
+    color: var(--apple-gray-2);
 }
 
 /* ==========================================
-   TOAST NOTIFICATIONS
+   TOAST NOTIFICATIONS — Apple style
    ========================================== */
 .toast-container {
     position: fixed;
@@ -1372,14 +1435,14 @@ body::before {
 }
 
 .toast {
-    background: var(--bg-elevated);
+    background: var(--apple-white);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-lg);
     padding: 14px 18px;
     border-radius: var(--radius-md);
-    color: white;
+    color: var(--apple-gray-1);
     font-size: 0.88rem;
     font-weight: 500;
     display: flex;
@@ -1388,13 +1451,13 @@ body::before {
     pointer-events: auto;
     animation: toastIn 0.3s var(--ease-spring);
     transition: opacity 0.25s ease, transform 0.25s ease;
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid var(--apple-blue);
 }
 
-.toast-success { border-left-color: var(--success); }
-.toast-error { border-left-color: var(--danger); }
-.toast-warning { border-left-color: var(--warning); }
-.toast-info { border-left-color: var(--info); }
+.toast-success { border-left-color: var(--apple-green); }
+.toast-error { border-left-color: var(--apple-red); }
+.toast-warning { border-left-color: var(--apple-orange); }
+.toast-info { border-left-color: var(--apple-blue); }
 
 .toast.fade-out { opacity: 0; transform: translateY(-8px) scale(0.96); }
 
@@ -1434,19 +1497,19 @@ body::before {
 .empty-state {
     text-align: center;
     padding: 48px 24px;
-    color: var(--text-muted);
+    color: var(--apple-gray-4);
 }
 
 .empty-state-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
-.empty-state-text { font-size: 0.9rem; }
+.empty-state-text { font-size: 0.9rem; color: var(--apple-gray-3); }
 
 /* ==========================================
-   SCROLLBAR
+   SCROLLBAR — Apple thin scrollbar
    ========================================== */
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+::-webkit-scrollbar-thumb { background: var(--apple-gray-5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--apple-gray-4); }
 
 /* ==========================================
    RESPONSIVE
@@ -1463,20 +1526,23 @@ body::before {
     .app-header {
         padding: 12px 16px;
     }
-    
+
     .nav-tabs {
         width: 100%;
         overflow-x: auto;
     }
-    
+
     .welcome-banner { padding: 24px; }
     .welcome-title { font-size: 1.4rem; }
     .upcoming-title { font-size: 1.5rem; }
     .upcoming-banner { padding: 28px; }
-    
+
     .stats-row { grid-template-columns: 1fr; }
-    
+
     .nav-tab-btn { padding: 6px 10px; font-size: 0.78rem; }
+    
+    .trip-selector-header h1 { font-size: 1.5rem; }
+    .app-container { padding: 20px 16px 100px; }
 }
 
 @media (max-width: 576px) {
@@ -1486,21 +1552,21 @@ body::before {
         align-items: center;
         padding: 10px 14px;
     }
-    
+
     .nav-tabs-container {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(9, 9, 11, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        background: rgba(251, 251, 253, 0.92);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
         border-top: 1px solid var(--border-subtle);
         padding: 6px 8px;
         z-index: 1000;
-        box-shadow: 0 -2px 20px rgba(0,0,0,0.5);
+        box-shadow: 0 -1px 10px rgba(0,0,0,0.04);
     }
-    
+
     .nav-tabs {
         width: 100%;
         border: none;
@@ -1511,7 +1577,7 @@ body::before {
         gap: 2px;
         border-radius: 0;
     }
-    
+
     .nav-tab-btn {
         flex-direction: column;
         align-items: center;
@@ -1521,19 +1587,26 @@ body::before {
         font-weight: 600;
         border-radius: var(--radius-sm);
     }
-    
+
     .nav-tab-btn svg { width: 18px; height: 18px; }
-    
+
     .user-profile { font-size: 0.8rem; }
     .user-info { display: none; }
-    
+
     .app-container { padding: 16px 12px 100px; }
-    
+
     .upcoming-banner { padding: 20px; }
     .upcoming-title { font-size: 1.3rem; }
     .upcoming-meta { flex-direction: column; gap: 8px; }
-    
+
     .trips-grid { grid-template-columns: 1fr; }
+    
+    .trip-selector-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .trip-selector-header h1 { font-size: 1.3rem; }
 }
 
 /* ==========================================
@@ -1547,7 +1620,7 @@ body::before {
 .global-nav-tabs {
     display: flex;
     gap: 6px;
-    background: var(--surface-1);
+    background: rgba(0,0,0,0.04);
     padding: 6px;
     border-radius: var(--radius-full);
     border: 1px solid var(--border-subtle);
@@ -1556,28 +1629,28 @@ body::before {
 .global-nav-tab-btn {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--apple-gray-3);
     font-family: var(--font-sans);
     font-weight: 600;
     font-size: 0.88rem;
     padding: 10px 20px;
     border-radius: var(--radius-full);
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .global-nav-tab-btn:hover {
-    color: var(--text-primary);
-    background: var(--surface-2);
+    color: var(--apple-gray-1);
+    background: rgba(0,0,0,0.04);
 }
 
 .global-nav-tab-btn.active {
     color: white;
-    background: var(--primary-dark);
-    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+    background: var(--apple-blue);
+    box-shadow: 0 2px 10px rgba(0, 113, 227, 0.3);
 }
 
 .global-tab-content {
@@ -1601,18 +1674,18 @@ body::before {
     align-items: center;
     padding: 8px 12px;
     border-radius: var(--radius-xs);
-    background: var(--surface-2);
+    background: var(--apple-gray-6);
     border: 1px solid var(--border-subtle);
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .checklist-checkbox-item:hover {
-    background: var(--surface-3);
+    background: rgba(0,113,227,0.03);
     border-color: var(--border-default);
 }
 
 .checklist-checkbox-item input[type="checkbox"] {
-    accent-color: var(--primary);
+    accent-color: var(--apple-blue);
     width: 18px;
     height: 18px;
     cursor: pointer;
@@ -1622,7 +1695,7 @@ body::before {
     font-size: 0.9rem;
     font-weight: 500;
     margin-left: 10px;
-    color: var(--text-primary);
+    color: var(--apple-gray-1);
 }
 
 .checklist-checkbox-role {
@@ -1641,7 +1714,7 @@ body::before {
     display: flex;
     gap: 6px;
     opacity: 0;
-    transition: opacity var(--transition-fast);
+    transition: opacity 0.2s ease;
     z-index: 10;
 }
 
@@ -1651,19 +1724,22 @@ body::before {
 }
 
 .trip-card-actions .btn-icon {
-    background: var(--bg-elevated);
+    background: var(--apple-white);
     border: 1px solid var(--border-default);
     padding: 6px 8px;
     border-radius: var(--radius-xs);
     cursor: pointer;
     font-size: 0.85rem;
-    transition: var(--transition-fast);
+    transition: all 0.2s ease;
+    color: var(--apple-gray-3);
+    box-shadow: var(--shadow-sm);
 }
 
 .trip-card-actions .btn-icon:hover {
-    background: var(--surface-hover);
+    background: var(--apple-gray-6);
     border-color: var(--border-strong);
     transform: scale(1.08);
+    color: var(--apple-gray-1);
 }
 
 @media (max-width: 768px) {
